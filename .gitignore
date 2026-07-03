@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Environment Variables
+.env
+frontend/.env
+
+# Uploaded Files
+uploads/
+
+# Build Files
+dist/
+frontend/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db
