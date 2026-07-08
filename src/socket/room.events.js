@@ -68,24 +68,7 @@ export const registerRoomEvents = (io, socket) => {
         maxPlayers: room.maxPlayers || 2,
       });
 
-      // Auto-start when a room is full or when 1v1 reaches 2 players
-      const canAutoStart = room.mode === "1v1"
-        ? room.players.length === 2
-        : room.players.length >= Math.min(room.maxPlayers || 2, 4);
 
-      if (canAutoStart) {
-        io.to(roomCode).emit("room-ready", {
-          message: room.mode === "1v1" ? "Both players joined! Game starting soon..." : "Room is full! Game starting soon...",
-          players: room.players.map((p) => ({ username: p.username })),
-        });
-
-        setTimeout(async () => {
-          const freshRoom = await Room.findOne({ roomCode });
-          if (freshRoom && freshRoom.status === "waiting") {
-            await startGame(io, freshRoom);
-          }
-        }, 3000);
-      }
     } catch (err) {
       socket.emit("error", { message: err.message });
     }
