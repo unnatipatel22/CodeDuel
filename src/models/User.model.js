@@ -49,6 +49,22 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    age: {
+      type: Number,
+      min: 10,
+      max: 100,
+      default: null,
+    },
+    profession: {
+      type: String,
+      enum: ["student", "other"],
+      default: null,
+    },
+    yearOfStudy: {
+      type: String,
+      enum: ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year+", "Postgraduate"],
+      default: null,
+    },
   },
   { timestamps: true }
 );

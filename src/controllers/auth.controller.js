@@ -8,20 +8,29 @@ const generateToken = (id) => {
   });
 };
 
+const getDefaultAvatar = (username) => `https://api.dicebear.com/7.x/identicon/svg?seed=${username}`;
 
 export const register = async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, bio, age, profession, yearOfStudy } = req.body;
 
-
-    const profilePic = req.file ? `/uploads/${req.file.filename}` : "";
-
+    // If multer uploaded a profile picture, use it; otherwise use DiceBear avatar
+    let profilePic = "";
+    if (req.file) {
+      profilePic = `/uploads/${req.file.filename}`;
+    } else {
+      profilePic = getDefaultAvatar(username);
+    }
 
     const user = await User.create({
       username,
       email,
       password,
-      profilePic
+      profilePic,
+      bio: bio || "",
+      age: age ? Number(age) : null,
+      profession: profession || null,
+      yearOfStudy: profession === "student" ? (yearOfStudy || null) : null,
     });
 
     const token = generateToken(user._id);
@@ -35,8 +44,14 @@ export const register = async (req, res, next) => {
         username: user.username,
         email: user.email,
         profilePic: user.profilePic,
+        bio: user.bio,
         wins: user.wins,
         losses: user.losses,
+        totalMatches: user.totalMatches,
+        isAdmin: user.isAdmin,
+        age: user.age,
+        profession: user.profession,
+        yearOfStudy: user.yearOfStudy,
       },
     });
   } catch (error) {
@@ -68,6 +83,11 @@ export const login = async (req, res, next) => {
         profilePic: user.profilePic,
         wins: user.wins,
         losses: user.losses,
+        totalMatches: user.totalMatches,
+        isAdmin: user.isAdmin,
+        age: user.age,
+        profession: user.profession,
+        yearOfStudy: user.yearOfStudy,
       },
     });
   } catch (error) {
@@ -89,6 +109,10 @@ export const getMe = async (req, res, next) => {
         wins: user.wins,
         losses: user.losses,
         totalMatches: user.totalMatches,
+        isAdmin: user.isAdmin,
+        age: user.age,
+        profession: user.profession,
+        yearOfStudy: user.yearOfStudy,
       },
     });
   } catch (error) {

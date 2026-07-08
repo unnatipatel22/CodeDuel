@@ -2,25 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
   Play, Send, Users, MessageSquare, AlertCircle,
-  Award, Hourglass, CheckCircle2, XCircle, Loader2
+  Activity, Award, Hourglass, CheckCircle2, XCircle, Loader2
 } from 'lucide-react';
+import DarkVeil from './DarkVeil/DarkVeil';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
 
 const SUPPORTED_LANGUAGES = [
-  { value: 'javascript', label: 'JavaScript' },
-  { value: 'typescript', label: 'TypeScript' },
-  { value: 'python', label: 'Python 3' },
-  { value: 'cpp', label: 'C++' },
-  { value: 'c', label: 'C' },
-  { value: 'java', label: 'Java' },
-  { value: 'go', label: 'Go' },
-  { value: 'rust', label: 'Rust' },
-  { value: 'kotlin', label: 'Kotlin' },
-  { value: 'csharp', label: 'C#' },
-  { value: 'php', label: 'PHP' },
-  { value: 'ruby', label: 'Ruby' },
-  { value: 'swift', label: 'Swift' }
+  { label: 'JavaScript', value: 'javascript' },
+  { label: 'Python 3', value: 'python' },
+  { label: 'C++', value: 'cpp' },
+  { label: 'Java', value: 'java' }
 ];
 
 const getDefaultStarterCode = (lang, problem) => {
@@ -33,13 +25,13 @@ const getDefaultStarterCode = (lang, problem) => {
     case 'typescript':
       return `function ${functionName}() {\n  // Write your code here\n}\n`;
     case 'python':
-      return `def ${functionName}():\n    # Write your code here\n    pass\n`;
+      return `class Solution:\n    def ${functionName}(self):\n        # Write your code here\n        pass\n`;
     case 'cpp':
-      return `#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n  // Write your code here\n  return 0;\n}\n`;
+      return `class Solution {\npublic:\n    int ${functionName}() {\n        // Write your code here\n        return 0;\n    }\n};\n`;
     case 'c':
-      return `#include <stdio.h>\n\nint main() {\n  // Write your code here\n  return 0;\n}\n`;
+      return `int ${functionName}() {\n    // Write your code here\n    return 0;\n}\n`;
     case 'java':
-      return `import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}\n`;
+      return `class Solution {\n    public int ${functionName}() {\n        // Write your code here\n        return 0;\n    }\n}\n`;
     case 'go':
       return `package main\n\nimport "fmt"\n\nfunc main() {\n    // Write your code here\n}\n`;
     case 'rust':
@@ -84,6 +76,7 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
   const [runResult, setRunResult] = useState(null);
   const [activeEmotes, setActiveEmotes] = useState([]);
   const [playerLines, setPlayerLines] = useState({});
+  const [activeTab, setActiveTab] = useState('problem');
 
   const [roomSettings, setRoomSettings] = useState({
     mode: initialRoom.mode || '1v1',
@@ -98,10 +91,30 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
   useEffect(() => {
     if (!socket) return;
 
-    socket.emit('join-room', {
+    console.log('GameArena socket init', {
       roomCode: room.roomCode,
+      socketConnected: socket.connected,
       userId: user.id,
-      username: user.username
+      username: user.username,
+      mode: room.mode,
+    });
+
+    const emitJoin = () => {
+      console.log('GameArena emitting join-room', { roomCode: room.roomCode, userId: user.id, username: user.username });
+      socket.emit('join-room', {
+        roomCode: room.roomCode,
+        userId: user.id,
+        username: user.username,
+      });
+    };
+
+    if (socket.connected) {
+      emitJoin();
+    }
+
+    socket.on('connect', () => {
+      console.log('GameArena socket connected, now joining room');
+      emitJoin();
     });
 
     socket.on('room-update', ({ players: updated, creatorId, mode, difficulty, topic, timeLimit, maxPlayers }) => {
@@ -193,6 +206,25 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
       socket.off('error');
     };
   }, [socket, room.roomCode, user.id, language]);
+
+  // Local timer for Practice Mode
+  useEffect(() => {
+    let interval;
+    if (gameState === 'live' && roomSettings.mode === 'practice') {
+      interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [gameState, roomSettings.mode]);
 
   const handleToggleReady = () => {
     socket?.emit('toggle-ready', {
@@ -303,7 +335,22 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
     `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
   return (
-    <div className="layout-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: '#000000' }}>
+      {/* Background Animation */}
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
+        <DarkVeil
+          hueShift={-15}
+          noiseIntensity={0}
+          scanlineIntensity={0}
+          speed={1.2}
+          scanlineFrequency={0}
+          warpAmount={0}
+          resolutionScale={1.25}
+        />
+      </div>
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'radial-gradient(circle at 50% 50%, rgba(5, 5, 8, 0.4) 0%, rgba(5, 5, 8, 0.85) 90%)', zIndex: 1, pointerEvents: 'none' }} />
+
+      <div className="layout-container" style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', height: '100vh' }}>
 
       {systemAlert && (
         <div style={{
@@ -346,30 +393,90 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
         </div>
       )}
 
-      <header className="header">
-        <div className="logo-container">
-          <span className="logo-text">⚡ ROOM: {room.roomCode}</span>
+      <header className="header" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '16px 32px',
+        background: 'var(--bg-secondary)',
+        borderBottom: '1px solid var(--border-color)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100
+      }}>
+        {/* Left Timer */}
+        <div style={{
+          background: 'var(--bg-tertiary)',
+          border: '1px solid var(--border-color)',
+          padding: '8px 16px',
+          borderRadius: '24px',
+          fontFamily: 'var(--font-mono)',
+          fontWeight: '700',
+          fontSize: '1.2rem',
+          color: '#fff'
+        }}>
+          {formatTime(timer)}
         </div>
 
-        {gameState === 'live' && (
-          <div style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: '1.1rem',
-            color: 'var(--color-cyan)',
-            fontWeight: '700',
-            background: 'rgba(0, 242, 254, 0.08)',
-            padding: '6px 16px',
-            borderRadius: '20px',
-            border: '1px solid rgba(0, 242, 254, 0.15)'
-          }}>
-            ⏳ {formatTime(timer)}
+        {/* Center VS */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontWeight: '700', color: 'var(--color-cyan)', fontSize: '1.1rem' }}>{user.username}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>1847 rating</div>
           </div>
-        )}
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--color-cyan)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>
+            {user.username.charAt(0).toUpperCase()}
+          </div>
+          {roomSettings.mode !== 'practice' && (
+            <>
+              <div style={{ color: 'var(--text-muted)', fontWeight: '800', fontSize: '0.9rem' }}>VS</div>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--color-purple)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>
+                {players.find(p => p.username !== user.username)?.username?.charAt(0).toUpperCase() || '?'}
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: '700', color: 'var(--color-purple)', fontSize: '1.1rem' }}>{players.find(p => p.username !== user.username)?.username || 'Opponent'}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>1923 rating</div>
+              </div>
+            </>
+          )}
+        </div>
 
-        <button onClick={onLeave} className="btn btn-outline" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-          Leave Arena
-        </button>
+        {/* Right Status */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-red)', fontWeight: '800', fontSize: '0.9rem', letterSpacing: '1px' }}>
+            <div style={{ width: '10px', height: '10px', background: 'var(--color-red)', borderRadius: '50%' }}></div>
+            DUEL LIVE
+          </div>
+          <button onClick={onLeave} className="btn btn-outline" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+            Leave
+          </button>
+        </div>
       </header>
+
+      {gameState === 'live' && (
+        <div style={{ display: 'flex', width: '100%', padding: '12px 32px', background: 'var(--bg-primary)' }}>
+          <div style={{ flex: 1, paddingRight: roomSettings.mode === 'practice' ? '0' : '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', fontWeight: '700' }}>
+              <span style={{ color: 'var(--color-cyan)' }}>YOU</span>
+              <span style={{ color: 'var(--text-secondary)' }}>100%</span>
+            </div>
+            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
+              <div style={{ width: '100%', height: '100%', background: 'var(--color-cyan)', borderRadius: '2px' }}></div>
+            </div>
+          </div>
+          {roomSettings.mode !== 'practice' && (
+            <div style={{ flex: 1, paddingLeft: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', fontWeight: '700' }}>
+                <span style={{ color: 'var(--color-purple)' }}>OPPONENT</span>
+                <span style={{ color: 'var(--text-secondary)' }}>40%</span>
+              </div>
+              <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
+                <div style={{ width: '40%', height: '100%', background: 'var(--color-purple)', borderRadius: '2px' }}></div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {gameState === 'waiting' && (
         <div style={{
@@ -393,7 +500,7 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
                 <div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>GAME MODE</div>
                   <div style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-primary)', textTransform: 'capitalize' }}>
-                    {roomSettings.mode === '1v1' ? '1v1 speed duel' : roomSettings.mode === 'practice' ? 'solo practice' : 'multiplayer brawl'}
+                    {roomSettings.mode === 'practice' ? 'solo practice' : roomSettings.mode === 'multiplayer' ? 'group battle' : '1v1 speed duel'}
                   </div>
                 </div>
                 <div>
@@ -647,6 +754,45 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
             <button onClick={onLeave} className="btn btn-purple" style={{ width: '100%', padding: '12px' }}>
               Return to Lobby
             </button>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+              <button onClick={async () => {
+                try {
+                  const res = await fetch(`${API_BASE}/rooms/rematch`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ roomId: room.id })
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    // Copy code to clipboard and alert
+                    const url = `${window.location.origin}?room=${data.room.roomCode}`;
+                    await navigator.clipboard.writeText(url);
+                    alert('Rematch created. Shareable link copied to clipboard: ' + url);
+                  } else {
+                    alert(data.message || 'Rematch failed');
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert('Rematch failed');
+                }
+              }} className="btn btn-outline" style={{ flex: 1 }}>
+                Rematch
+              </button>
+              <button onClick={() => {
+                // Show replay modal using gameOverData.submission
+                const code = gameOverData?.submission?.code || gameOverData?.submission?.codeText || '';
+                const w = window.open('', '_blank', 'width=900,height=700');
+                if (w) {
+                  w.document.body.style.background = '#0b0e14';
+                  w.document.body.style.color = '#fff';
+                  w.document.body.style.fontFamily = 'Inter, system-ui, sans-serif';
+                  w.document.title = 'Replay - CodeDuel';
+                  w.document.body.innerHTML = `<pre style="white-space:pre-wrap;font-family:monospace;font-size:13px;padding:20px">${(code || '').replace(/</g,'&lt;')}</pre>`;
+                }
+              }} className="btn btn-cyan" style={{ flex: 1 }}>
+                View Replay
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -693,328 +839,249 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
 
       {/* Live Coding Arena */}
       {gameState === 'live' && problem && (
-        <div className="ide-grid" style={{ flex: 1 }}>
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2px', background: 'var(--border-color)', height: 'calc(100vh - 120px)' }}>
 
-          {/* Column 1: Problem Description */}
-          <div className="panel animate-fade-in" style={{ borderRadius: '12px' }}>
-            <div className="panel-header">
-              <span>Problem Description</span>
-              <span style={{ color: 'var(--color-cyan)', fontWeight: '600' }}>{problem.difficulty || 'Medium'}</span>
-            </div>
-            <div className="panel-body" style={{ color: 'var(--text-primary)', lineHeight: '1.6' }}>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '12px', color: '#fff' }}>{problem.title}</h2>
-              <pre style={{
-                fontFamily: 'var(--font-sans)',
-                whiteSpace: 'pre-wrap',
-                fontSize: '0.95rem',
-                color: 'var(--text-secondary)'
-              }}>{problem.description}</pre>
-            </div>
-          </div>
-
-          {/* Column 2: Code Editor */}
-          <div className="panel animate-fade-in" style={{ borderRadius: '12px' }}>
-            <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>Code Editor</span>
-              <select
-                value={language}
-                onChange={(e) => handleLanguageChange(e.target.value)}
-                style={{
-                  background: 'var(--bg-tertiary)',
-                  border: '1px solid var(--border-color)',
-                  color: 'var(--color-cyan)',
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  outline: 'none',
-                  fontSize: '0.85rem',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
+          {/* Left Column: Problem & Chat Tabs */}
+          <div style={{ background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+            
+            {/* Tabs Header */}
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
+              <div 
+                onClick={() => setActiveTab('problem')}
+                style={{ padding: '16px 24px', cursor: 'pointer', fontWeight: '600', fontSize: '0.95rem', borderBottom: activeTab === 'problem' ? '2px solid var(--color-cyan)' : '2px solid transparent', color: activeTab === 'problem' ? 'var(--color-cyan)' : 'var(--text-secondary)' }}
               >
-                {SUPPORTED_LANGUAGES.map((lang) => (
-                  <option key={lang.value} value={lang.value}>
-                    {lang.label}
-                  </option>
-                ))}
-              </select>
+                📝 Problem
+              </div>
+              <div 
+                onClick={() => setActiveTab('chat')}
+                style={{ padding: '16px 24px', cursor: 'pointer', fontWeight: '600', fontSize: '0.95rem', borderBottom: activeTab === 'chat' ? '2px solid var(--color-cyan)' : '2px solid transparent', color: activeTab === 'chat' ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+              >
+                💬 Chat
+              </div>
+              <div style={{ marginLeft: 'auto', padding: '16px 24px' }}>
+                 <span style={{ border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--color-red)', padding: '4px 12px', borderRadius: '16px', fontSize: '0.75rem', fontWeight: '700' }}>
+                   {problem.difficulty?.toUpperCase() || 'HARD'}
+                 </span>
+              </div>
             </div>
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-              <textarea
-                value={code}
-                onChange={handleCodeEdit}
-                onKeyDown={handleKeyDown}
-                className="code-editor-textarea"
-                placeholder={`// Write your ${SUPPORTED_LANGUAGES.find(l => l.value === language)?.label || language} code here...`}
-              />
-            </div>
-            <div style={{
-              padding: '12px 16px',
-              borderTop: '1px solid var(--border-color)',
-              background: 'rgba(0,0,0,0.1)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px'
-            }}>
-              {/* Dry Run Output Panel */}
-              {runResult && (
-                <div style={{
-                  fontSize: '0.88rem',
-                  padding: '12px',
-                  background: 'rgba(0, 0, 0, 0.3)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '8px',
-                  width: '100%',
-                  textAlign: 'left'
-                }}>
-                  <div style={{ fontWeight: '700', color: runResult.allPassed ? 'var(--color-green)' : 'var(--color-amber)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {runResult.allPassed ? '🚀 Dry Run: All Sample Test Cases Passed!' : `⚠️ Dry Run: ${runResult.testCasesPassed}/${runResult.totalTestCases} Test Cases Passed`}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '140px', overflowY: 'auto' }}>
-                    {runResult.results?.map((res, idx) => (
-                      <div key={idx} style={{ fontSize: '0.82rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '6px', marginBottom: '6px' }}>
-                        <span style={{ color: res.passed ? 'var(--color-green)' : 'var(--color-red)', fontWeight: 'bold' }}>
-                          {res.passed ? '✓ Pass' : '✗ Fail'}
-                        </span>
-                        <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>Test Case #{idx + 1}</span>
-                        <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', paddingLeft: '14px', marginTop: '2px', wordBreak: 'break-all' }}>
-                          Input: {res.input?.substring(0, 50)} <br/>
-                          Expected: {res.expectedOutput} | Actual: {res.actualOutput || 'none'}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '12px',
-                width: '100%'
-              }}>
-                <div>
-                  {submissionResult && (
-                    <div style={{
-                      fontSize: '0.9rem',
-                      fontWeight: '600',
-                      color: submissionResult.error ? 'var(--color-red)' : submissionResult.allPassed ? 'var(--color-green)' : 'var(--color-amber)'
-                    }}>
-                      {submissionResult.error ? (
-                        <span>❌ {submissionResult.error}</span>
-                      ) : submissionResult.allPassed ? (
-                        <span>🏆 Victory! Code Accepted!</span>
-                      ) : (
-                        <span>⚠️ {submissionResult.testCasesPassed}/{submissionResult.totalTestCases} Passed (Wrong Answer)</span>
-                      )}
+            {/* Tab Content */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px' }}>
+              {activeTab === 'problem' ? (
+                <>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px', color: '#fff' }}>{problem.title}</h2>
+                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: 'var(--text-secondary)', lineHeight: '1.7', whiteSpace: 'pre-wrap', marginBottom: '32px' }}>
+                    {problem.description}
+                  </div>
+                  
+                  {problem.sampleTestCases?.length > 0 && (
+                    <div style={{ marginBottom: '32px' }}>
+                      <div style={{ fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Example 1</div>
+                      {problem.sampleTestCases.slice(0,1).map((tc, idx) => (
+                        <div key={idx} style={{ padding: '16px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                          <div><strong style={{ color: 'var(--text-primary)' }}>Input:</strong> {tc.input}</div>
+                          <div><strong style={{ color: 'var(--text-primary)' }}>Output:</strong> {tc.expectedOutput}</div>
+                        </div>
+                      ))}
                     </div>
                   )}
-                </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button
-                    onClick={handleRun}
-                    disabled={running || submitting}
-                    className="btn btn-outline"
-                    style={{ padding: '10px 18px', fontSize: '0.95rem' }}
-                  >
-                    {running ? <Loader2 className="spin" size={16} /> : null}
-                    <span>Run Code</span>
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={submitting || running}
-                    className="btn btn-cyan"
-                    style={{ padding: '10px 24px', fontSize: '0.95rem' }}
-                  >
-                    {submitting ? <Loader2 className="spin" size={16} /> : <Play size={16} />}
-                    <span>Submit Code</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Column 3: Live Stats & Activity */}
-          <div className="panel animate-fade-in" style={{ borderRadius: '12px' }}>
-            <div className="panel-header">
-              <span>Arena Statistics</span>
-            </div>
-            <div className="panel-body" style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '16px' }}>
-              
-              {/* Competitors List */}
-              <div className="glass-panel" style={{ padding: '16px', background: 'rgba(255,255,255,0.01)' }}>
-                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '12px', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {roomSettings.mode === 'practice' ? 'Solo Practice' : 'Competitors'}
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: '600', color: 'var(--color-cyan)' }}>You ({user.username})</span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {code.split('\n').length} lines
-                    </span>
+                  <div style={{ marginBottom: '32px' }}>
+                    <div style={{ fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Constraints</div>
+                    <ul style={{ paddingLeft: '24px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <li>1 &le; n &le; 2 &times; 10<sup>4</sup></li>
+                      <li>0 &le; height[i] &le; 10<sup>5</sup></li>
+                    </ul>
                   </div>
 
-                  {/* Render Opponents if not practice mode */}
-                  {roomSettings.mode !== 'practice' && (
-                    <>
-                      {roomSettings.mode === '1v1' ? (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: '600', color: 'var(--color-purple)' }}>Opponent</span>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                            {opponentLines} lines
-                          </span>
-                        </div>
-                      ) : (
-                        // Multiplayer
-                        players.filter(p => p.username !== user.username).map((p, idx) => (
-                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontWeight: '600', color: 'var(--color-purple)' }}>{p.username}</span>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                              {playerLines[p.username] || 0} lines
-                            </span>
+                  <div style={{ padding: '24px', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.3)', background: 'rgba(245, 158, 11, 0.05)' }}>
+                    <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-amber)', fontWeight: '700', marginBottom: '12px' }}>
+                       <AlertCircle size={18} /> AI HINT
+                    </h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                      Two-pointer approach achieves O(n) time. Track leftMax and rightMax as you close in from both ends.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '16px' }}>
+                    {chatMessages.map((msg, idx) => {
+                      const isMe = msg.username === user.username;
+                      return (
+                        <div key={idx} style={{ alignSelf: isMe ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px', textAlign: isMe ? 'right' : 'left' }}>
+                            {msg.username}
                           </div>
-                        ))
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Emotes Reaction Bar (Only for non-practice modes) */}
-              {roomSettings.mode !== 'practice' && (
-                <div className="glass-panel" style={{ padding: '12px', background: 'rgba(255,255,255,0.01)' }}>
-                  <h4 style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '8px', fontWeight: '700' }}>
-                    Reactions
-                  </h4>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {['🤯', '🚀', '🔥', '👍', '😢', '😂', 'GG'].map((em) => (
-                      <button
-                        key={em}
-                        onClick={() => {
-                          socket?.emit('send-emote', {
-                            roomCode: room.roomCode,
-                            username: user.username,
-                            emote: em
-                          });
-                        }}
-                        className="btn btn-outline"
-                        style={{ padding: '4px', fontSize: '1.2rem', minWidth: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                      >
-                        {em}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Chat Panel (Only for non-practice modes) */}
-              {roomSettings.mode !== 'practice' && (
-                <div className="glass-panel" style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  overflow: 'hidden',
-                  background: 'rgba(255,255,255,0.01)',
-                  minHeight: '200px'
-                }}>
-                  <div style={{
-                    padding: '10px 14px',
-                    borderBottom: '1px solid var(--border-color)',
-                    fontWeight: '600',
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}>
-                    <MessageSquare size={14} />
-                    <span>Arena Chat</span>
-                  </div>
-                  <div style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: '12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px'
-                  }}>
-                    {chatMessages.length === 0 ? (
-                      <div style={{
-                        textAlign: 'center',
-                        color: 'var(--text-muted)',
-                        fontSize: '0.85rem',
-                        marginTop: '20px'
-                      }}>
-                        Send a message to competitors!
-                      </div>
-                    ) : (
-                      chatMessages.map((msg, idx) => {
-                        const isMe = msg.username === user.username;
-                        return (
-                          <div key={idx} style={{
-                            alignSelf: isMe ? 'flex-end' : 'flex-start',
-                            maxWidth: '85%'
+                          <div style={{
+                            padding: '12px 16px',
+                            borderRadius: '12px',
+                            borderTopRightRadius: isMe ? '4px' : '12px',
+                            borderTopLeftRadius: !isMe ? '4px' : '12px',
+                            background: isMe ? 'var(--color-cyan)' : 'var(--bg-secondary)',
+                            color: isMe ? '#020617' : 'var(--text-primary)',
+                            fontSize: '0.95rem',
                           }}>
-                            <div style={{
-                              fontSize: '0.7rem',
-                              color: 'var(--text-secondary)',
-                              marginBottom: '2px',
-                              textAlign: isMe ? 'right' : 'left'
-                            }}>
-                              {msg.username}
-                            </div>
-                            <div style={{
-                              padding: '8px 12px',
-                              borderRadius: '12px',
-                              borderTopRightRadius: isMe ? '2px' : '12px',
-                              borderTopLeftRadius: !isMe ? '2px' : '12px',
-                              background: isMe ? 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)' : 'rgba(255,255,255,0.06)',
-                              color: isMe ? '#020617' : 'var(--text-primary)',
-                              fontSize: '0.85rem',
-                              fontWeight: isMe ? '600' : 'normal'
-                            }}>
-                              {msg.message}
-                            </div>
+                            {msg.message}
                           </div>
-                        );
-                      })
-                    )}
+                        </div>
+                      );
+                    })}
                     <div ref={chatEndRef} />
                   </div>
                   <form onSubmit={(e) => {
                     e.preventDefault();
                     if (!newMessage.trim()) return;
-                    socket?.emit('send-message', {
-                      roomCode: room.roomCode,
-                      username: user.username,
-                      message: newMessage
-                    });
+                    socket?.emit('send-message', { roomCode: room.roomCode, username: user.username, message: newMessage });
                     setNewMessage('');
-                  }} style={{
-                    padding: '10px',
-                    borderTop: '1px solid var(--border-color)',
-                    display: 'flex',
-                    gap: '8px'
-                  }}>
+                  }} style={{ display: 'flex', gap: '12px' }}>
                     <input
                       type="text"
                       placeholder="Type message..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       className="form-input"
-                      style={{ padding: '8px 12px', fontSize: '0.85rem' }}
+                      style={{ flex: 1 }}
                     />
-                    <button type="submit" className="btn btn-purple" style={{ padding: '8px 12px' }}>
-                      <Send size={14} />
+                    <button type="submit" className="btn btn-purple">
+                      <Send size={18} />
                     </button>
                   </form>
                 </div>
               )}
-
             </div>
           </div>
 
+          {/* Right Column: Code Editor & Terminal */}
+          <div style={{ background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+            
+            {/* Editor Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
+              <select
+                value={language}
+                onChange={(e) => handleLanguageChange(e.target.value)}
+                style={{
+                  background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  outline: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang.value} value={lang.value} style={{ background: '#0f172a', color: '#f8fafc' }}>{lang.label}</option>
+                ))}
+              </select>
+              {runResult && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: runResult.allPassed ? 'var(--color-green)' : 'var(--color-red)', fontWeight: '700', fontSize: '0.9rem' }}>
+                  {runResult.allPassed ? (
+                    <><CheckCircle2 size={16} /> ACCEPTED</>
+                  ) : (
+                    <><AlertCircle size={16} /> FAILED</>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Code Editor */}
+            <div style={{ flex: 1, position: 'relative' }}>
+              <textarea
+                value={code}
+                onChange={handleCodeEdit}
+                onKeyDown={handleKeyDown}
+                className="code-editor-textarea"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  background: 'transparent',
+                  color: 'var(--text-primary)',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '1rem',
+                  lineHeight: '1.6',
+                  padding: '24px',
+                  border: 'none',
+                  outline: 'none',
+                  resize: 'none'
+                }}
+                spellCheck={false}
+                placeholder={`// Write your ${SUPPORTED_LANGUAGES.find(l => l.value === language)?.label || language} code here...`}
+              />
+            </div>
+
+            {/* Terminal Output */}
+            {runResult && (
+              <div style={{
+                height: '200px',
+                background: '#0a0a0a',
+                borderTop: '1px solid var(--border-color)',
+                padding: '16px 24px',
+                overflowY: 'auto',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.9rem',
+                color: 'var(--text-secondary)'
+              }}>
+                <div style={{ marginBottom: '8px' }}>stdout</div>
+                <div style={{ color: 'var(--text-primary)', marginBottom: '16px' }}>[0, 1]</div>
+                {runResult.results?.map((res, idx) => (
+                  <div key={idx} style={{ color: res.passed ? 'var(--color-green)' : 'var(--color-red)', marginBottom: '4px' }}>
+                    {res.passed ? '✓' : '✗'} Test {idx + 1} {res.passed ? 'passed' : 'failed'}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Success Banner */}
+            {submissionResult && submissionResult.allPassed && (
+              <div style={{
+                background: 'rgba(34, 197, 94, 0.1)',
+                borderTop: '1px solid rgba(34, 197, 94, 0.2)',
+                padding: '16px 24px',
+                color: 'var(--color-green)',
+                fontWeight: '700',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <CheckCircle2 size={20} /> You won the duel! +24 rating 🏆
+              </div>
+            )}
+
+            {/* Bottom Actions Bar */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '16px 24px',
+              borderTop: '1px solid var(--border-color)',
+              background: 'var(--bg-secondary)'
+            }}>
+              <div></div>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <button
+                  onClick={handleRun}
+                  disabled={running || submitting}
+                  className="btn"
+                  style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                >
+                  {running ? <Loader2 className="spin" size={16} /> : <Play size={16} />}
+                  <span>Run</span>
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitting || running}
+                  className="btn btn-green"
+                >
+                  {submitting ? <Loader2 className="spin" size={16} /> : <CheckCircle2 size={16} />}
+                  <span>Submit</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
         </div>
       )}
 
@@ -1045,6 +1112,7 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
             <span style={{ fontSize: '1.5rem' }}>{e.emote}</span>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

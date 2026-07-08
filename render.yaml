@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: codeduel-backend
+    env: node
+    branch: main
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: /api
+    envVars:
+      - key: NODE_ENV
+        value: production

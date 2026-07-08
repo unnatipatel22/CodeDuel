@@ -59,3 +59,48 @@ export const getMyStats = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { username, age, profession, yearOfStudy } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) return next(new AppError("User not found", 404));
+
+    if (username && username !== user.username) {
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+        return next(new AppError("Username is already taken", 400));
+      }
+      user.username = username;
+    }
+
+    if (age) user.age = Number(age);
+    if (profession) user.profession = profession;
+    if (profession === "student" && yearOfStudy) {
+      user.yearOfStudy = yearOfStudy;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully!",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        profilePic: user.profilePic,
+        wins: user.wins,
+        losses: user.losses,
+        totalMatches: user.totalMatches,
+        isAdmin: user.isAdmin,
+        age: user.age,
+        profession: user.profession,
+        yearOfStudy: user.yearOfStudy,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

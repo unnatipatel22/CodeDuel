@@ -77,7 +77,7 @@ const roomSchema = new mongoose.Schema(
     maxPlayers: {
       type: Number,
       default: 2,
-      min: [2, "Room must allow at least 2 players"],
+      min: [1, "Room must allow at least 1 player"],
       max: [20, "Room can have at most 20 players"],
     },
     status: {

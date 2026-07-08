@@ -3,6 +3,10 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import passport from "passport";
+import "./src/config/passport.js";
 import connectDB from "./src/db/connect.js";
 import { initSocket } from "./src/socket/socket.handler.js";
 import { syncProblemsWithDB } from "./src/utils/problemFetcher.js";
@@ -13,6 +17,8 @@ import roomRoutes from "./src/routes/room.route.js";
 import problemRoutes from "./src/routes/problem.route.js";
 import submissionRoutes from "./src/routes/submission.route.js";
 import leaderboardRoutes from "./src/routes/leaderboard.route.js";
+import adminRoutes from "./src/routes/admin.route.js";
+import practiceRoutes from './src/routes/practice.route.js';
 
 import { errorHandler } from "./src/middlewares/error.middleware.js";
 
@@ -28,8 +34,17 @@ const io = new Server(httpServer, {
   },
 });
 
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || origin.startsWith('http://localhost:')) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(express.json());
+app.use(passport.initialize());
 
 
 app.use("/uploads", express.static("uploads"));
@@ -45,9 +60,24 @@ app.use("/api/rooms", roomRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/admin", adminRoutes);
+app.use('/api/practice', practiceRoutes);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDist = path.join(__dirname, "frontend", "dist");
+
+app.use(express.static(frontendDist));
 
 app.get("/", (req, res) => {
   res.json({ message: "CodeDuel API is running 🚀" });
+});
+
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
+    return next();
+  }
+  res.sendFile(path.join(frontendDist, "index.html"));
 });
 
 app.use(errorHandler);

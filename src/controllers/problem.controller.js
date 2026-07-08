@@ -26,13 +26,18 @@ export const getAllProblems = async (req, res, next) => {
 
 export const getRandomProblem = async (req, res, next) => {
   try {
-    const { difficulty } = req.query;
+    const { difficulty, topic } = req.query;
     const filter = { isActive: true };
 
     if (difficulty) filter.difficulty = difficulty;
+    
+    // Filter by topic/tag if provided
+    if (topic) {
+      filter.tags = { $in: [topic] };
+    }
 
     const count = await Problem.countDocuments(filter);
-    if (count === 0) return next(new AppError("No problems found", 404));
+    if (count === 0) return next(new AppError("No problems found with selected criteria", 404));
 
     const random = Math.floor(Math.random() * count);
     const problem = await Problem.findOne(filter).skip(random).select(

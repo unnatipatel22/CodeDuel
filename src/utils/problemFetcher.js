@@ -384,39 +384,17 @@ const fallbackProblems = [
 
 export const syncProblemsWithDB = async () => {
   try {
-    console.log("🔄 Fetching problems dynamically from public online API...");
-    let problemsToSync = fallbackProblems;
-
-    try {
-      const response = await axios.get(PUBLIC_PROBLEMS_URL, { timeout: 4000 });
-      if (response.data && Array.isArray(response.data)) {
-        problemsToSync = response.data;
-        console.log(`✅ Loaded ${problemsToSync.length} problems from online repository.`);
-      }
-    } catch (fetchErr) {
-      console.warn("⚠️ Could not load online problems (using pre-defined fallback list):", fetchErr.message);
+    console.log("🔄 Using local database for problems...");
+    console.log("✅ Problems are managed via Admin Panel. Add questions there instead of fetching online.");
+    
+    // Check if there are any problems in DB
+    const problemCount = await Problem.countDocuments({ isActive: true });
+    if (problemCount === 0) {
+      console.warn("⚠️ No problems found in database. Use Admin Panel to add problems.");
+    } else {
+      console.log(`✅ Found ${problemCount} active problems in database.`);
     }
-
-    for (const p of problemsToSync) {
-      await Problem.findOneAndUpdate(
-        { title: p.title },
-        {
-          $set: {
-            description: p.description,
-            difficulty: p.difficulty,
-            tags: p.tags,
-            constraints: p.constraints,
-            examples: p.examples,
-            testCases: p.testCases,
-            starterCode: p.starterCode,
-            isActive: true
-          }
-        },
-        { upsert: true, new: true }
-      );
-    }
-    console.log(`✅ MongoDB Problem Database synced successfully!`);
   } catch (err) {
-    console.error("❌ Problem synchronization failed:", err.message);
+    console.error("❌ Problem check failed:", err.message);
   }
 };

@@ -4,6 +4,7 @@ import Auth from './components/Auth';
 import Lobby from './components/Lobby';
 import GameArena from './components/GameArena';
 import Landing from './components/Landing';
+import OAuthCallback from './components/OAuthCallback';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -26,12 +27,18 @@ export default function App() {
 
   useEffect(() => {
     if (room && token) {
-      const socketUrl = 'http://localhost:5000';
+      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
       const newSocket = io(socketUrl, {
-        transports: ['websocket'],
-        upgrade: false
+        auth: { token },
       });
-      
+
+      newSocket.on('connect', () => {
+        console.log('Socket connected:', newSocket.id);
+      });
+      newSocket.on('connect_error', (err) => {
+        console.error('Socket connect_error:', err.message || err);
+      });
+
       setSocket(newSocket);
 
       return () => {
@@ -123,12 +130,18 @@ export default function App() {
     content = (
       <Lobby
         user={user}
+        setUser={setUser}
         token={token}
         onLogout={handleLogout}
         onCreateRoom={handleCreateRoom}
         onJoinRoom={handleJoinRoom}
       />
     );
+  }
+
+  // OAuth callback route
+  if (window.location.pathname === '/oauth-callback' && !token) {
+    return <OAuthCallback onAuthSuccess={handleAuthSuccess} />;
   }
 
   return (

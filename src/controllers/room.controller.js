@@ -2,6 +2,8 @@ import Room from "../models/Room.model.js";
 import Problem from "../models/Problem.model.js";
 import { getUniqueRoomCode } from "../utils/generateRoomCode.js";
 import { AppError } from "../middlewares/error.middleware.js";
+import { normalizeTopic } from "../utils/topic.utils.js";
+import mongoose from 'mongoose';
 
 export const selectProblemForRoom = async (difficulty, topic) => {
   const query = { isActive: true };
@@ -42,6 +44,7 @@ export const selectProblemForRoom = async (difficulty, topic) => {
 export const createRoom = async (req, res, next) => {
   try {
     const { mode, difficulty, topic, timeLimit, maxPlayers, displayName } = req.body;
+    const normalizedTopic = normalizeTopic(topic);
     const roomCode = await getUniqueRoomCode();
 
     let problemId = null;
@@ -51,7 +54,7 @@ export const createRoom = async (req, res, next) => {
     if (mode === "practice") {
       status = "live";
       startedAt = new Date();
-      const problem = await selectProblemForRoom(difficulty, topic);
+      const problem = await selectProblemForRoom(difficulty, normalizedTopic);
       if (problem) {
         problemId = problem._id;
       }
@@ -64,7 +67,7 @@ export const createRoom = async (req, res, next) => {
       creatorId: req.user._id,
       mode: mode || "1v1",
       difficulty: difficulty || "all",
-      topic: topic || "all",
+      topic: normalizedTopic,
       maxPlayers: mode === "practice" ? 1 : (maxPlayers || 2),
       timeLimit: timeLimit || 1800,
       problemId,
@@ -99,6 +102,53 @@ export const createRoom = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const createRematch = async (req, res, next) => {
+  try {
+    const { roomId } = req.body;
+    if (!roomId || !mongoose.Types.ObjectId.isValid(roomId)) return next(new AppError('Invalid roomId', 400));
+    const prev = await Room.findById(roomId).lean();
+    if (!prev) return next(new AppError('Original room not found', 404));
+
+    // Create a new room using same problem if available
+    const roomCode = await getUniqueRoomCode();
+    const newRoom = await Room.create({
+      roomCode,
+      creatorId: req.user._id,
+      mode: prev.mode || '1v1',
+      difficulty: prev.difficulty || 'all',
+      topic: prev.topic || 'all',
+      maxPlayers: prev.maxPlayers || 2,
+      timeLimit: prev.timeLimit || 1800,
+      problemId: prev.problemId || prev.selectedProblemId || null,
+      status: 'waiting',
+      players: [
+        {
+          userId: req.user._id,
+          username: req.user.username,
+          socketId: null,
+          isReady: true,
+        },
+      ],
+    });
+
+    res.status(201).json({ success: true, room: {
+      id: newRoom._id,
+      roomCode: newRoom.roomCode,
+      status: newRoom.status,
+      players: newRoom.players,
+      mode: newRoom.mode,
+      difficulty: newRoom.difficulty,
+      topic: newRoom.topic,
+      timeLimit: newRoom.timeLimit,
+      maxPlayers: newRoom.maxPlayers,
+      creatorId: newRoom.creatorId,
+      problemId: newRoom.problemId,
+    }});
+  } catch (err) {
+    next(err);
   }
 };
 

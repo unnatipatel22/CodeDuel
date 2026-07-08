@@ -81,8 +81,9 @@ export default function Landing({ onNavigateToAuth }) {
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
       }}>
-        <div className="logo-container">
-          <span className="logo-text" style={{ fontSize: '1.6rem' }}>⚡ CODEDUEL</span>
+        <div className="logo-container" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <img src="/logo.png" alt="CodeDuel Logo" style={{ width: '40px', height: '40px', borderRadius: '4px' }} />
+          <span className="logo-text" style={{ fontSize: '1.6rem', color: '#ffffff', fontWeight: 800 }}>CodeDuel</span>
         </div>
         <div style={{ display: 'flex', gap: '16px' }}>
           <button
@@ -144,9 +145,8 @@ export default function Landing({ onNavigateToAuth }) {
             lineHeight: 1.15,
             letterSpacing: '-1.5px',
             marginBottom: '20px',
-            background: 'linear-gradient(135deg, #ffffff 30%, #a8b3cf 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            color: '#f8fbff',
+            textShadow: '0 0 24px rgba(0, 242, 254, 0.18)'
           }}>
             Clash in Speed.<br />
             Conquer the Algorithms.
@@ -263,7 +263,7 @@ export default function Landing({ onNavigateToAuth }) {
         borderTop: '1px solid rgba(255, 255, 255, 0.05)',
         background: 'rgba(5, 5, 8, 0.4)'
       }}>
-        &copy; {new Date().getFullYear()} CodeDuel Arena. Powered by React Bits & OGL. All rights reserved.
+        &copy; {new Date().getFullYear()} CodeDuel. All rights reserved.
       </footer>
     </div>
   );

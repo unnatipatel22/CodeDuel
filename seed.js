@@ -191,7 +191,7 @@ const problems = [
     constraints: "1 <= strs.length <= 200\n0 <= strs[i].length <= 200\nstrs[i] consists of only lowercase English letters.",
     testCases: [
       { input: "3\nflower\nflow\nflight", expectedOutput: "fl", isSample: true },
-      { input: "3\ndog\nracecar\ncar", expectedOutput: "", isSample: false },
+      { input: "3\ndog\nracecar\ncar", expectedOutput: "EMPTY", isSample: false },
       { input: "1\nalone", expectedOutput: "alone", isSample: false },
     ],
     starterCode: {
@@ -368,7 +368,7 @@ const problems = [
     constraints: "The number of nodes in both lists is in the range [0, 50].\n-100 <= Node.val <= 100\nBoth list1 and list2 are sorted in non-decreasing order.",
     testCases: [
       { input: "3\n1 2 4\n3\n1 3 4", expectedOutput: "1 1 2 3 4 4", isSample: true },
-      { input: "0\n\n0\n", expectedOutput: "", isSample: false },
+      { input: "0\n\n0\n", expectedOutput: "EMPTY", isSample: false },
       { input: "0\n\n1\n0", expectedOutput: "0", isSample: false },
     ],
     starterCode: {
@@ -419,7 +419,7 @@ const problems = [
     testCases: [
       { input: "7\n4 2 7 1 3 6 9", expectedOutput: "4 7 2 9 6 3 1", isSample: true },
       { input: "3\n2 1 3", expectedOutput: "2 3 1", isSample: false },
-      { input: "0", expectedOutput: "", isSample: false },
+      { input: "0", expectedOutput: "EMPTY", isSample: false },
     ],
     starterCode: {
       javascript: "function invertTree(root) {\n    if (!root) return null;\n    // Swap children recursively\n}",
