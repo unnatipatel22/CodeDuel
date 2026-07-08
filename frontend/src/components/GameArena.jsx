@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
-  Play, Send, Users, MessageSquare, AlertCircle,
+  Play, Send, Users, MessageSquare, AlertCircle, Zap,
   Activity, Award, Hourglass, CheckCircle2, XCircle, Loader2
 } from 'lucide-react';
 import DarkVeil from './DarkVeil/DarkVeil';
