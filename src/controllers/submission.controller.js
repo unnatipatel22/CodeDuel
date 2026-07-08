@@ -78,6 +78,7 @@ export const submitCode = async (req, res, next) => {
         winnerId: req.user._id,
         winnerUsername: player.username,
         submission: {
+          code: code,
           testCasesPassed: executionResult.passed,
           totalTestCases: executionResult.total,
         },

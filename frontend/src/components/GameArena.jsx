@@ -313,7 +313,7 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
     try {
       const res = await axios.post(
         `${API_BASE}/submissions`,
-        { code, language, roomId: room.id },
+        { code, language, roomId: room.id || room._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
