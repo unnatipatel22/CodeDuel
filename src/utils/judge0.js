@@ -5,32 +5,27 @@ import path from "path";
 import { spawnSync } from "child_process";
 
 export const LANGUAGE_IDS = {
-  javascript: 63,
-  typescript: 74,
-  python: 71,
-  cpp: 54,
-  c: 50,
-  java: 62,
-  go: 60,
-  rust: 73,
-  kotlin: 78,
-  csharp: 51,
-  php: 68,
-  ruby: 72,
-  swift: 83,
+  javascript: "javascript",
+  typescript: "typescript",
+  python: "python",
+  cpp: "cpp",
+  c: "c",
+  java: "java",
+  go: "go",
+  rust: "rust",
+  kotlin: "kotlin",
+  csharp: "csharp",
+  php: "php",
+  ruby: "ruby",
+  swift: "swift",
 };
 
-const judge0Enabled = Boolean(
-  process.env.JUDGE0_URL &&
-  process.env.JUDGE0_API_KEY &&
-  !process.env.JUDGE0_API_KEY.includes("your_rapidapi_key")
-);
+// Piston API configuration
+const PISTON_API_URL = "https://api.piston.rocks/execute";
 
-const judge0Axios = axios.create({
-  baseURL: process.env.JUDGE0_URL,
+const pistonAxios = axios.create({
+  baseURL: "https://api.piston.rocks",
   headers: {
-    "X-RapidAPI-Key": process.env.JUDGE0_API_KEY,
-    "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
     "Content-Type": "application/json",
   },
 });
@@ -296,34 +291,57 @@ const maybeWrapJavaCode = (code, input) => {
 };
 
 const executeCode = async (code, languageId, input) => {
-  if (languageId === LANGUAGE_IDS.javascript) {
+  if (languageId === "javascript") {
     code = maybeWrapJSCode(code, input);
-  } else if (languageId === LANGUAGE_IDS.python) {
+  } else if (languageId === "python") {
     code = maybeWrapPythonCode(code, input);
-  } else if (languageId === LANGUAGE_IDS.cpp || languageId === LANGUAGE_IDS.c) {
+  } else if (languageId === "cpp" || languageId === "c") {
     code = maybeWrapCppCode(code, input);
-  } else if (languageId === LANGUAGE_IDS.java) {
+  } else if (languageId === "java") {
     code = maybeWrapJavaCode(code, input);
   }
 
-  if (!judge0Enabled) {
+  // Try Piston API first
+  try {
+    const pistonResponse = await pistonAxios.post("/execute", {
+      language: languageId,
+      version: "*",
+      files: [
+        {
+          name: "solution",
+          content: code,
+        }
+      ],
+      stdin: input,
+    });
+
+    const { run } = pistonResponse.data;
+    
+    return {
+      stdout: (run?.stdout || "").trim(),
+      stderr: (run?.stderr || "").trim(),
+      status: { id: 3, description: run?.code === 0 ? "Accepted" : "Runtime Error" },
+      time: run?.wall || 0,
+    };
+  } catch (pistonError) {
+    // Fallback to local execution if Piston API fails
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "codeduel-"));
     let result;
 
     try {
-      if (languageId === LANGUAGE_IDS.javascript) {
+      if (languageId === "javascript") {
         const filePath = path.join(tempDir, "solution.cjs");
         fs.writeFileSync(filePath, code, "utf-8");
         result = spawnSync(process.execPath, [filePath], {
           input, encoding: "utf-8", timeout: 10000,
         });
-      } else if (languageId === LANGUAGE_IDS.python) {
+      } else if (languageId === "python") {
         const filePath = path.join(tempDir, "solution.py");
         fs.writeFileSync(filePath, code, "utf-8");
         result = spawnSync("python", [filePath], {
           input, encoding: "utf-8", timeout: 10000,
         });
-      } else if (languageId === LANGUAGE_IDS.cpp || languageId === LANGUAGE_IDS.c) {
+      } else if (languageId === "cpp" || languageId === "c") {
         const filePath = path.join(tempDir, "solution.cpp");
         const outPath = path.join(tempDir, "solution.exe");
         fs.writeFileSync(filePath, code, "utf-8");
@@ -334,7 +352,7 @@ const executeCode = async (code, languageId, input) => {
         result = spawnSync(outPath, [], {
           input, encoding: "utf-8", timeout: 10000,
         });
-      } else if (languageId === LANGUAGE_IDS.java) {
+      } else if (languageId === "java") {
         const filePath = path.join(tempDir, "Main.java");
         fs.writeFileSync(filePath, code, "utf-8");
         const compile = spawnSync("javac", [filePath], { encoding: "utf-8" });
@@ -345,7 +363,7 @@ const executeCode = async (code, languageId, input) => {
           input, encoding: "utf-8", timeout: 10000,
         });
       } else {
-        throw new Error(`Local execution for language ID ${languageId} is not supported. Configure Judge0 API keys.`);
+        throw new Error(`Local execution for language ${languageId} is not supported.`);
       }
 
       if (result.error) {
@@ -372,18 +390,6 @@ const executeCode = async (code, languageId, input) => {
         // Ignore cleanup errors
       }
     }
-  }
-
-  try {
-    const submitRes = await judge0Axios.post("/submissions?base64_encoded=false&wait=true", {
-      source_code: code,
-      language_id: languageId,
-      stdin: input,
-    });
-
-    return submitRes.data;
-  } catch (error) {
-    throw new Error(`Judge0 execution failed: ${error.message}`);
   }
 };
 
