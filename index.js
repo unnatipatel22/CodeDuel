@@ -36,7 +36,12 @@ const io = new Server(httpServer, {
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow localhost for development
     if (!origin || origin.startsWith('http://localhost:')) {
+      return callback(null, true);
+    }
+    // Allow production and render domains
+    if (origin && (origin.includes('.onrender.com') || origin.includes('codeduel'))) {
       return callback(null, true);
     }
     callback(new Error('Not allowed by CORS'));
