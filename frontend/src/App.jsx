@@ -27,7 +27,7 @@ export default function App() {
 
   useEffect(() => {
     if (room && token) {
-      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+      const socketUrl = import.meta.env.PROD ? '' : (import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000');
       const newSocket = io(socketUrl, {
         auth: { token },
       });

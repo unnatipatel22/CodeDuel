@@ -7,7 +7,7 @@ import PracticeStats from './PracticeStats';
 import PracticeHistory from './PracticeHistory';
 import { normalizeTopic } from '../../../src/utils/topic.utils.js';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.PROD ? '/api' : (import.meta.env.VITE_API_BASE || 'http://localhost:5000/api');
 
 export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, onJoinRoom }) {
   const [roomCode, setRoomCode] = useState('');
