@@ -77,6 +77,9 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
   const [activeEmotes, setActiveEmotes] = useState([]);
   const [playerLines, setPlayerLines] = useState({});
   const [activeTab, setActiveTab] = useState('problem');
+  // Mobile panel: 'problem' | 'code'
+  const [mobilePanelTab, setMobilePanelTab] = useState('problem');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const [roomSettings, setRoomSettings] = useState({
     mode: initialRoom.mode || '1v1',
@@ -87,6 +90,12 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
   });
 
   const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (!socket) return;
@@ -397,64 +406,79 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '16px 32px',
+        padding: isMobile ? '10px 16px' : '16px 32px',
         background: 'var(--bg-secondary)',
         borderBottom: '1px solid var(--border-color)',
         position: 'sticky',
         top: 0,
-        zIndex: 100
+        zIndex: 100,
+        flexWrap: 'nowrap',
+        gap: '8px'
       }}>
         {/* Left Timer */}
         <div style={{
           background: 'var(--bg-tertiary)',
           border: '1px solid var(--border-color)',
-          padding: '8px 16px',
+          padding: isMobile ? '6px 10px' : '8px 16px',
           borderRadius: '24px',
           fontFamily: 'var(--font-mono)',
           fontWeight: '700',
-          fontSize: '1.2rem',
-          color: '#fff'
+          fontSize: isMobile ? '0.95rem' : '1.2rem',
+          color: '#fff',
+          flexShrink: 0
         }}>
           {formatTime(timer)}
         </div>
 
         {/* Center VS */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontWeight: '700', color: 'var(--color-cyan)', fontSize: '1.1rem' }}>{user.username}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>1847 rating</div>
-          </div>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--color-cyan)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '16px', flex: 1, justifyContent: 'center', minWidth: 0, overflow: 'hidden' }}>
+          <div style={{ width: isMobile ? '26px' : '32px', height: isMobile ? '26px' : '32px', borderRadius: '50%', background: 'var(--color-cyan)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: isMobile ? '0.75rem' : '1rem', flexShrink: 0 }}>
             {user.username.charAt(0).toUpperCase()}
           </div>
+          {!isMobile && (
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontWeight: '700', color: 'var(--color-cyan)', fontSize: '1.1rem' }}>{user.username}</div>
+            </div>
+          )}
+          {isMobile && (
+            <span style={{ fontWeight: '700', color: 'var(--color-cyan)', fontSize: '0.85rem', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.username}</span>
+          )}
           {roomSettings.mode !== 'practice' && (
             <>
-              <div style={{ color: 'var(--text-muted)', fontWeight: '800', fontSize: '0.9rem' }}>VS</div>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--color-purple)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>
+              <div style={{ color: 'var(--text-muted)', fontWeight: '800', fontSize: isMobile ? '0.75rem' : '0.9rem', flexShrink: 0 }}>VS</div>
+              <div style={{ width: isMobile ? '26px' : '32px', height: isMobile ? '26px' : '32px', borderRadius: '50%', background: 'var(--color-purple)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: isMobile ? '0.75rem' : '1rem', flexShrink: 0 }}>
                 {players.find(p => p.username !== user.username)?.username?.charAt(0).toUpperCase() || '?'}
               </div>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontWeight: '700', color: 'var(--color-purple)', fontSize: '1.1rem' }}>{players.find(p => p.username !== user.username)?.username || 'Opponent'}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>1923 rating</div>
-              </div>
+              {isMobile ? (
+                <span style={{ fontWeight: '700', color: 'var(--color-purple)', fontSize: '0.85rem', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{players.find(p => p.username !== user.username)?.username || 'Opp'}</span>
+              ) : (
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontWeight: '700', color: 'var(--color-purple)', fontSize: '1.1rem' }}>{players.find(p => p.username !== user.username)?.username || 'Opponent'}</div>
+                </div>
+              )}
             </>
           )}
         </div>
 
         {/* Right Status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-red)', fontWeight: '800', fontSize: '0.9rem', letterSpacing: '1px' }}>
-            <div style={{ width: '10px', height: '10px', background: 'var(--color-red)', borderRadius: '50%' }}></div>
-            DUEL LIVE
-          </div>
-          <button onClick={onLeave} className="btn btn-outline" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '16px', flexShrink: 0 }}>
+          {!isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-red)', fontWeight: '800', fontSize: '0.9rem', letterSpacing: '1px' }}>
+              <div style={{ width: '10px', height: '10px', background: 'var(--color-red)', borderRadius: '50%' }}></div>
+              LIVE
+            </div>
+          )}
+          {isMobile && (
+            <div style={{ width: '8px', height: '8px', background: 'var(--color-red)', borderRadius: '50%', flexShrink: 0 }}></div>
+          )}
+          <button onClick={onLeave} className="btn btn-outline" style={{ padding: isMobile ? '6px 10px' : '8px 16px', fontSize: '0.8rem' }}>
             Leave
           </button>
         </div>
       </header>
 
       {gameState === 'live' && (
-        <div style={{ display: 'flex', width: '100%', padding: '12px 32px', background: 'var(--bg-primary)' }}>
+        <div style={{ display: 'flex', width: '100%', padding: isMobile ? '8px 16px' : '12px 32px', background: 'var(--bg-primary)' }}>
           <div style={{ flex: 1, paddingRight: roomSettings.mode === 'practice' ? '0' : '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', fontWeight: '700' }}>
               <span style={{ color: 'var(--color-cyan)' }}>YOU</span>
@@ -481,9 +505,9 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
       {gameState === 'waiting' && (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1.2fr 1fr',
-          gap: '32px',
-          padding: '40px 24px',
+          gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr',
+          gap: isMobile ? '16px' : '32px',
+          padding: isMobile ? '16px' : '40px 24px',
           maxWidth: '1200px',
           width: '100%',
           margin: '0 auto',
@@ -839,10 +863,11 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
 
       {/* Live Coding Arena */}
       {gameState === 'live' && problem && (
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2px', background: 'var(--border-color)', height: 'calc(100vh - 120px)' }}>
+        <>
+        <div style={{ flex: 1, display: isMobile ? 'flex' : 'grid', flexDirection: isMobile ? 'column' : undefined, gridTemplateColumns: isMobile ? undefined : '1fr 1.5fr', gap: '2px', background: 'var(--border-color)', height: isMobile ? 'auto' : 'calc(100vh - 120px)', minHeight: isMobile ? 'calc(100vh - 60px)' : undefined }}>
 
           {/* Left Column: Problem & Chat Tabs */}
-          <div style={{ background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--bg-primary)', display: isMobile ? (mobilePanelTab === 'problem' ? 'flex' : 'none') : 'flex', flexDirection: 'column', height: isMobile ? 'calc(100vh - 115px)' : '100%', overflow: 'hidden' }}>
             
             {/* Tabs Header */}
             <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
@@ -953,7 +978,7 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
           </div>
 
           {/* Right Column: Code Editor & Terminal */}
-          <div style={{ background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--bg-primary)', display: isMobile ? (mobilePanelTab === 'code' ? 'flex' : 'none') : 'flex', flexDirection: 'column', height: isMobile ? 'calc(100vh - 115px)' : '100%', overflow: 'hidden' }}>
             
             {/* Editor Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
@@ -1083,6 +1108,65 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
 
           </div>
         </div>
+
+        {/* Mobile Bottom Tab Bar */}
+        {isMobile && (
+          <div style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            display: 'flex',
+            background: 'rgba(10, 11, 16, 0.98)',
+            borderTop: '1px solid var(--border-color)',
+            zIndex: 500,
+            backdropFilter: 'blur(12px)'
+          }}>
+            <button
+              onClick={() => setMobilePanelTab('problem')}
+              style={{
+                flex: 1,
+                padding: '12px 0',
+                background: mobilePanelTab === 'problem' ? 'rgba(0,242,254,0.08)' : 'transparent',
+                border: 'none',
+                borderTop: mobilePanelTab === 'problem' ? '2px solid var(--color-cyan)' : '2px solid transparent',
+                color: mobilePanelTab === 'problem' ? 'var(--color-cyan)' : 'var(--text-muted)',
+                fontWeight: '700',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <span>📝</span>
+              <span>Problem</span>
+            </button>
+            <button
+              onClick={() => setMobilePanelTab('code')}
+              style={{
+                flex: 1,
+                padding: '12px 0',
+                background: mobilePanelTab === 'code' ? 'rgba(155,81,224,0.08)' : 'transparent',
+                border: 'none',
+                borderTop: mobilePanelTab === 'code' ? '2px solid var(--color-purple)' : '2px solid transparent',
+                color: mobilePanelTab === 'code' ? 'var(--color-purple)' : 'var(--text-muted)',
+                fontWeight: '700',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <span>💻</span>
+              <span>Code</span>
+            </button>
+          </div>
+        )}
+        </>
       )}
 
       {/* Floating Emote Reactions Overlay */}

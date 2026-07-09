@@ -356,29 +356,33 @@ export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, on
                       {loadingLeaderboard ? (
                         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}><Loader2 className="spin" size={24} style={{ margin: '0 auto 12px' }}/> Loading ranks...</div>
                       ) : leaderboard.length > 0 ? (
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <div style={{ width: '100%', overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '400px' }}>
                           <thead>
                             <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
-                              <th style={{ padding: '20px 24px', color: 'var(--color-cyan)', fontWeight: 700 }}>Rank</th>
-                              <th style={{ padding: '20px 24px', color: 'var(--text-secondary)', fontWeight: 600 }}>Coder</th>
-                              <th style={{ padding: '20px 24px', color: 'var(--text-secondary)', fontWeight: 600 }}>Wins</th>
-                              <th style={{ padding: '20px 24px', color: 'var(--text-secondary)', fontWeight: 600 }}>Win Rate</th>
+                              <th style={{ padding: '16px 16px', color: 'var(--color-cyan)', fontWeight: 700 }}>Rank</th>
+                              <th style={{ padding: '16px 16px', color: 'var(--text-secondary)', fontWeight: 600 }}>Coder</th>
+                              <th style={{ padding: '16px 16px', color: 'var(--text-secondary)', fontWeight: 600 }}>Wins</th>
+                              <th style={{ padding: '16px 16px', color: 'var(--text-secondary)', fontWeight: 600 }}>Win Rate</th>
                             </tr>
                           </thead>
                           <tbody>
                             {leaderboard.map((u, idx) => (
                               <tr key={u._id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                <td style={{ padding: '20px 24px', fontWeight: 800, color: idx < 3 ? 'var(--color-amber)' : 'var(--text-primary)' }}>#{idx + 1}</td>
-                                <td style={{ padding: '20px 24px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '12px', color: '#fff' }}>
-                                  <img src={u.profilePic || `https://api.dicebear.com/7.x/identicon/svg?seed=${u.username}`} alt="avatar" style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-tertiary)' }} />
-                                  {u.username} {u._id === user.id && <span style={{ fontSize: '0.75rem', color: '#000', background: 'var(--color-cyan)', padding: '2px 8px', borderRadius: '12px', marginLeft: '8px', fontWeight: 800 }}>YOU</span>}
+                                <td style={{ padding: '14px 16px', fontWeight: 800, color: idx < 3 ? 'var(--color-amber)' : 'var(--text-primary)' }}>#{idx + 1}</td>
+                                <td style={{ padding: '14px 16px', fontWeight: 600, color: '#fff' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <img src={u.profilePic || `https://api.dicebear.com/7.x/identicon/svg?seed=${u.username}`} alt="avatar" style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-tertiary)', flexShrink: 0 }} />
+                                    <span>{u.username} {u._id === user.id && <span style={{ fontSize: '0.7rem', color: '#000', background: 'var(--color-cyan)', padding: '2px 6px', borderRadius: '10px', marginLeft: '4px', fontWeight: 800 }}>YOU</span>}</span>
+                                  </div>
                                 </td>
-                                <td style={{ padding: '20px 24px', color: 'var(--color-green)', fontWeight: 700 }}>{u.wins}</td>
-                                <td style={{ padding: '20px 24px', color: 'var(--text-secondary)' }}>{u.totalMatches > 0 ? Math.round((u.wins / u.totalMatches) * 100) : 0}%</td>
+                                <td style={{ padding: '14px 16px', color: 'var(--color-green)', fontWeight: 700 }}>{u.wins}</td>
+                                <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }}>{u.totalMatches > 0 ? Math.round((u.wins / u.totalMatches) * 100) : 0}%</td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
+                        </div>
                       ) : (
                          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No ranked players yet. Be the first!</div>
                       )}

@@ -1040,3 +1040,211 @@ body {
   .dash-stats-grid { grid-template-columns: 1fr; }
   .nav-links { display: none; }
 }
+
+/* ═══════════════════════════════════════
+   MOBILE RESPONSIVE — Global
+═══════════════════════════════════════ */
+
+/* Ensure proper mobile viewport */
+html {
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+/* ── Mobile Navbar ── */
+@media (max-width: 768px) {
+  .top-navbar {
+    padding: 16px 16px 0 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 4px;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    padding: 6px 12px;
+  }
+
+  .nav-actions {
+    gap: 10px;
+  }
+
+  .dashboard-container {
+    padding: 16px 14px;
+    gap: 20px;
+  }
+
+  .dash-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .dash-title {
+    font-size: 1.5rem;
+  }
+
+  .dash-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .dash-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+/* ── Mobile Lobby Header ── */
+@media (max-width: 768px) {
+  .lobby-header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .lobby-header-right {
+    gap: 8px;
+  }
+
+  .lobby-user-pill {
+    padding: 4px 10px 4px 6px;
+    gap: 6px;
+  }
+
+  .lobby-main {
+    grid-template-columns: 1fr;
+    padding: 16px 14px;
+    gap: 20px;
+  }
+
+  .lobby-left {
+    gap: 16px;
+  }
+
+  .leaderboard-card {
+    min-height: auto;
+  }
+
+  .leaderboard-scroll {
+    max-height: 400px;
+  }
+}
+
+/* ── Mobile Lobby Stats Strip ── */
+@media (max-width: 480px) {
+  .stats-strip {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .stat-chip-num {
+    font-size: 1.1rem;
+  }
+
+  .stat-chip-label {
+    font-size: 0.62rem;
+  }
+
+  .stat-chip-divider {
+    display: none;
+  }
+}
+
+/* ── Mobile Modal ── */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal-card {
+    padding: 24px 20px;
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* ── Mobile Leaderboard Table ── */
+@media (max-width: 768px) {
+  .lb-stats {
+    gap: 6px;
+    font-size: 0.75rem;
+  }
+
+  .lb-matches {
+    display: none;
+  }
+}
+
+/* ── Mobile Game Arena Waiting Room ── */
+@media (max-width: 768px) {
+  .winrate-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .winrate-stats {
+    width: 100%;
+  }
+
+  .duel-actions-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .config-box {
+    padding: 12px;
+  }
+}
+
+/* ── Mobile form inputs ── */
+@media (max-width: 768px) {
+  .form-input {
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+
+  .btn {
+    min-height: 44px; /* Touch-friendly tap target */
+  }
+}
+
+/* ── Mobile code editor ── */
+@media (max-width: 768px) {
+  .code-editor-textarea {
+    font-size: 14px;
+    padding: 12px;
+  }
+}
+
+/* ── Prevent horizontal overflow ── */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  * {
+    max-width: 100%;
+  }
+
+  table {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+  }
+}

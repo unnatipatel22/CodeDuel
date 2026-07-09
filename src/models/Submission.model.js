@@ -30,7 +30,7 @@ const submissionSchema = new mongoose.Schema(
       required: true,
     },
     languageId: {
-      type: Number,
+      type: String,
       required: true,
     },
     status: {
