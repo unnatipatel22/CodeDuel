@@ -4,7 +4,7 @@ import Hyperspeed from './Hyperspeed/Hyperspeed';
 
 export default function Landing({ onNavigateToAuth }) {
   return (
-    <div style={{
+    <div className="landing-root" style={{
       position: 'relative',
       minHeight: '100vh',
       display: 'flex',
@@ -74,18 +74,18 @@ export default function Landing({ onNavigateToAuth }) {
       }} />
 
       {/* Header Navigation */}
-      <header className="header" style={{
+      <header className="header landing-header" style={{
         position: 'relative',
         zIndex: 2,
         background: 'rgba(5, 5, 8, 0.6)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
       }}>
-        <div className="logo-container" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="/logo.png" alt="CodeDuel Logo" style={{ width: '40px', height: '40px', borderRadius: '4px' }} />
-          <span className="logo-text" style={{ fontSize: '1.6rem', color: '#ffffff', fontWeight: 800 }}>CodeDuel</span>
+        <div className="landing-brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <img src="/logo.png" alt="CodeDuel Logo" className="landing-brand-logo" style={{ width: '40px', height: '40px', borderRadius: 0 }} />
+          <span className="logo-text landing-brand-text" style={{ fontSize: '1.6rem', color: '#ffffff', fontWeight: 800 }}>CodeDuel</span>
         </div>
-        <div style={{ display: 'flex', gap: '16px' }}>
+        <div className="landing-header-actions" style={{ display: 'flex', gap: '16px' }}>
           <button
             onClick={() => onNavigateToAuth(true)}
             className="btn btn-outline"
@@ -104,7 +104,7 @@ export default function Landing({ onNavigateToAuth }) {
       </header>
 
       {/* Main Hero content */}
-      <main style={{
+      <main className="landing-hero" style={{
         position: 'relative',
         zIndex: 2,
         flex: 1,
@@ -120,8 +120,8 @@ export default function Landing({ onNavigateToAuth }) {
       }}>
         
         {/* Hero Title */}
-        <div className="animate-fade-in" style={{ maxWidth: '800px', marginBottom: '40px' }}>
-          <div style={{
+        <div className="animate-fade-in landing-copy" style={{ maxWidth: '800px', marginBottom: '40px' }}>
+          <div className="landing-eyebrow" style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
@@ -139,7 +139,7 @@ export default function Landing({ onNavigateToAuth }) {
             <Terminal size={14} />
             The Ultimate Coding Arena
           </div>
-          <h1 style={{
+          <h1 className="landing-title" style={{
             fontSize: '3.6rem',
             fontWeight: 900,
             lineHeight: 1.15,
@@ -151,7 +151,7 @@ export default function Landing({ onNavigateToAuth }) {
             Clash in Speed.<br />
             Conquer the Algorithms.
           </h1>
-          <p style={{
+          <p className="landing-subtitle" style={{
             color: 'var(--text-secondary)',
             fontSize: '1.25rem',
             lineHeight: '1.6',
@@ -165,7 +165,7 @@ export default function Landing({ onNavigateToAuth }) {
         {/* Action Button */}
         <button
           onClick={() => onNavigateToAuth(false)}
-          className="btn btn-cyan glow-pulse animate-fade-in"
+          className="btn btn-cyan glow-pulse animate-fade-in landing-cta"
           style={{
             padding: '16px 36px',
             fontSize: '1.1rem',
@@ -178,14 +178,14 @@ export default function Landing({ onNavigateToAuth }) {
         </button>
 
         {/* Feature Cards Grid */}
-        <div style={{
+        <div className="animate-fade-in landing-feature-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
           gap: '24px',
           width: '100%'
-        }} className="animate-fade-in">
+        }}>
           
-          <div className="glass-panel" style={{ padding: '24px', textAlign: 'left', background: 'rgba(10, 11, 16, 0.45)' }}>
+          <div className="glass-panel landing-feature-card" style={{ padding: '24px', textAlign: 'left', background: 'rgba(10, 11, 16, 0.45)' }}>
             <div style={{
               color: 'var(--color-cyan)',
               marginBottom: '16px',
@@ -206,7 +206,7 @@ export default function Landing({ onNavigateToAuth }) {
             </p>
           </div>
 
-          <div className="glass-panel" style={{ padding: '24px', textAlign: 'left', background: 'rgba(10, 11, 16, 0.45)' }}>
+          <div className="glass-panel landing-feature-card" style={{ padding: '24px', textAlign: 'left', background: 'rgba(10, 11, 16, 0.45)' }}>
             <div style={{
               color: 'var(--color-purple)',
               marginBottom: '16px',
@@ -227,7 +227,7 @@ export default function Landing({ onNavigateToAuth }) {
             </p>
           </div>
 
-          <div className="glass-panel" style={{ padding: '24px', textAlign: 'left', background: 'rgba(10, 11, 16, 0.45)' }}>
+          <div className="glass-panel landing-feature-card" style={{ padding: '24px', textAlign: 'left', background: 'rgba(10, 11, 16, 0.45)' }}>
             <div style={{
               color: 'var(--color-green)',
               marginBottom: '16px',

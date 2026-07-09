@@ -359,7 +359,7 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
       </div>
       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'radial-gradient(circle at 50% 50%, rgba(5, 5, 8, 0.4) 0%, rgba(5, 5, 8, 0.85) 90%)', zIndex: 1, pointerEvents: 'none' }} />
 
-      <div className="layout-container" style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <div className="layout-container game-arena-shell" style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', height: '100vh' }}>
 
       {systemAlert && (
         <div style={{
@@ -864,13 +864,13 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
       {/* Live Coding Arena */}
       {gameState === 'live' && problem && (
         <>
-        <div style={{ flex: 1, display: isMobile ? 'flex' : 'grid', flexDirection: isMobile ? 'column' : undefined, gridTemplateColumns: isMobile ? undefined : '1fr 1.5fr', gap: '2px', background: 'var(--border-color)', height: isMobile ? 'auto' : 'calc(100vh - 120px)', minHeight: isMobile ? 'calc(100vh - 60px)' : undefined }}>
+        <div className="arena-live-layout" style={{ flex: 1, display: isMobile ? 'flex' : 'grid', flexDirection: isMobile ? 'column' : undefined, gridTemplateColumns: isMobile ? undefined : '1fr 1.5fr', gap: '2px', background: 'var(--border-color)', height: isMobile ? 'auto' : 'calc(100vh - 120px)', minHeight: isMobile ? 'calc(100vh - 60px)' : undefined }}>
 
           {/* Left Column: Problem & Chat Tabs */}
-          <div style={{ background: 'var(--bg-primary)', display: isMobile ? (mobilePanelTab === 'problem' ? 'flex' : 'none') : 'flex', flexDirection: 'column', height: isMobile ? 'calc(100vh - 115px)' : '100%', overflow: 'hidden' }}>
+          <div className="arena-panel arena-problem-panel" style={{ background: 'var(--bg-primary)', display: isMobile ? (mobilePanelTab === 'problem' ? 'flex' : 'none') : 'flex', flexDirection: 'column', height: isMobile ? 'calc(100vh - 115px)' : '100%', overflow: 'hidden' }}>
             
             {/* Tabs Header */}
-            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
+            <div className="arena-tabs-header" style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
               <div 
                 onClick={() => setActiveTab('problem')}
                 style={{ padding: '16px 24px', cursor: 'pointer', fontWeight: '600', fontSize: '0.95rem', borderBottom: activeTab === 'problem' ? '2px solid var(--color-cyan)' : '2px solid transparent', color: activeTab === 'problem' ? 'var(--color-cyan)' : 'var(--text-secondary)' }}
@@ -891,7 +891,7 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
             </div>
 
             {/* Tab Content */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px' }}>
+            <div className="arena-scroll-content" style={{ flex: 1, overflowY: 'auto', padding: '32px 24px' }}>
               {activeTab === 'problem' ? (
                 <>
                   <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px', color: '#fff' }}>{problem.title}</h2>
@@ -978,10 +978,10 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
           </div>
 
           {/* Right Column: Code Editor & Terminal */}
-          <div style={{ background: 'var(--bg-primary)', display: isMobile ? (mobilePanelTab === 'code' ? 'flex' : 'none') : 'flex', flexDirection: 'column', height: isMobile ? 'calc(100vh - 115px)' : '100%', overflow: 'hidden' }}>
+          <div className="arena-panel arena-code-panel" style={{ background: 'var(--bg-primary)', display: isMobile ? (mobilePanelTab === 'code' ? 'flex' : 'none') : 'flex', flexDirection: 'column', height: isMobile ? 'calc(100vh - 115px)' : '100%', overflow: 'hidden' }}>
             
             {/* Editor Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
+            <div className="arena-editor-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
               <select
                 value={language}
                 onChange={(e) => handleLanguageChange(e.target.value)}
@@ -1076,7 +1076,7 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
             )}
 
             {/* Bottom Actions Bar */}
-            <div style={{
+            <div className="arena-actions-bar" style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -1111,7 +1111,7 @@ export default function GameArena({ user, token, initialRoom, socket, onLeave })
 
         {/* Mobile Bottom Tab Bar */}
         {isMobile && (
-          <div style={{
+          <div className="arena-mobile-tabbar" style={{
             position: 'fixed',
             bottom: 0,
             left: 0,

@@ -118,7 +118,7 @@ export default function Auth({ onAuthSuccess, initialIsLogin = true, onBack }) {
   };
 
   return (
-    <div style={{
+    <div className="auth-screen" style={{
       position: 'fixed',
       top: 0, left: 0,
       width: '100vw', height: '100vh',
@@ -130,7 +130,7 @@ export default function Auth({ onAuthSuccess, initialIsLogin = true, onBack }) {
       background: 'transparent',
       zIndex: 9999,
     }}>
-      <div className="glass-panel glass-panel-glow-cyan animate-fade-in" style={{
+      <div className="glass-panel glass-panel-glow-cyan animate-fade-in auth-card" style={{
         width: '100%',
         maxWidth: '460px',
         padding: '36px 32px',
@@ -151,18 +151,12 @@ export default function Auth({ onAuthSuccess, initialIsLogin = true, onBack }) {
           </button>
         )}
 
-        {/* Top gradient line */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
-          background: 'linear-gradient(90deg, transparent, var(--color-cyan), var(--color-purple), transparent)',
-        }} />
-
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <div className="auth-header-copy" style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div className="float-slow" style={{ marginBottom: '14px' }}>
-            <img src="/logo.png" alt="CodeDuel Logo" style={{ width: '56px', height: '56px', borderRadius: '8px' }} />
+            <img src="/logo.png" alt="CodeDuel Logo" className="auth-logo" style={{ width: '56px', height: '56px', borderRadius: 0 }} />
           </div>
-          <h1 style={{
+          <h1 className="auth-title" style={{
             fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.5px',
             color: 'var(--text-primary)',
             marginBottom: '4px',
@@ -186,7 +180,7 @@ export default function Auth({ onAuthSuccess, initialIsLogin = true, onBack }) {
         )}
 
         {/* OAuth Buttons — always visible */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+        <div className="auth-oauth-stack" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
           {/* Google */}
           <button
             type="button"
@@ -240,16 +234,15 @@ export default function Auth({ onAuthSuccess, initialIsLogin = true, onBack }) {
 
         {/* Divider */}
         <div style={{ position: 'relative', textAlign: 'center', marginBottom: '20px' }}>
-          <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'rgba(255,255,255,0.07)' }} />
           <span style={{
-            position: 'relative', background: 'var(--bg-secondary)',
-            padding: '0 12px', color: 'var(--text-muted)', fontSize: '0.75rem',
+            position: 'relative',
+            padding: '0', color: 'var(--text-muted)', fontSize: '0.75rem',
             letterSpacing: '1px', textTransform: 'uppercase',
           }}>or with email</span>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <form className="auth-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {/* Username (signup only) */}
           {!isLogin && (
             <div style={{ position: 'relative' }}>

@@ -92,14 +92,14 @@ export default function PracticeStats({ token }) {
   const pathData = createSparklinePath(dayBuckets);
 
   return (
-    <div className="glass-panel glass-panel-glow-cyan" style={{ padding: '24px', marginBottom: '20px', border: '1px solid rgba(0, 242, 254, 0.18)' }}>
+    <div className="glass-panel glass-panel-glow-cyan practice-stats-panel" style={{ padding: '24px', marginBottom: '20px', border: '1px solid rgba(0, 242, 254, 0.18)' }}>
       <GlobalSpotlight gridRef={statsGridRef} spotlightRadius={320} glowColor="0, 242, 254" />
       <div style={{ marginBottom: '22px' }}>
         <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0 }}>Practice Stats</h3>
         <p style={{ margin: '10px 0 0', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>A clean overview of your recent activity, momentum, and engagement.</p>
       </div>
 
-      <div ref={statsGridRef} className="bento-section" style={{ display: 'grid', gap: '18px', gridTemplateColumns: '2.2fr 1fr 1.2fr', alignItems: 'stretch', minHeight: '320px' }}>
+      <div ref={statsGridRef} className="bento-section practice-stats-grid" style={{ display: 'grid', gap: '18px', gridTemplateColumns: '2.2fr 1fr 1.2fr', alignItems: 'stretch', minHeight: '320px' }}>
         <ParticleCard
           className="magic-bento-card--border-glow"
           style={{ borderRadius: '24px', width: '100%', padding: 0, backgroundColor: 'transparent' }}
@@ -109,7 +109,7 @@ export default function PracticeStats({ token }) {
           clickEffect={false}
           enableMagnetism={false}
         >
-          <div className="glass-panel glass-panel-glow-cyan" style={{ padding: '20px', borderRadius: '22px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div className="glass-panel glass-panel-glow-cyan practice-stat-card" style={{ padding: '20px', borderRadius: '22px', display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
               <div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>PRACTICE MOMENTUM</div>
@@ -148,7 +148,7 @@ export default function PracticeStats({ token }) {
           clickEffect={false}
           enableMagnetism={false}
         >
-          <div className="glass-panel glass-panel-glow-cyan" style={{ padding: '22px', borderRadius: '24px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div className="glass-panel glass-panel-glow-cyan practice-stat-card practice-activity-card" style={{ padding: '22px', borderRadius: '24px', display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
               <div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '1px' }}>SITE ACTIVITY</div>
@@ -179,7 +179,7 @@ export default function PracticeStats({ token }) {
                 <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>7D</div>
               </div>
             </div>
-            <div style={{ display: 'grid', flex: 1, minHeight: '180px', borderRadius: '18px', overflow: 'hidden' }}>
+            <div className="practice-chart-box" style={{ display: 'grid', flex: 1, minHeight: '180px', borderRadius: '18px', overflow: 'hidden' }}>
               <Sparkline points={dayBuckets} mounted={mounted} />
             </div>
             <div style={{ marginTop: '14px', display: 'grid', gap: '10px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
@@ -208,7 +208,7 @@ export default function PracticeStats({ token }) {
           clickEffect={false}
           enableMagnetism={false}
         >
-          <div className="glass-panel glass-panel-glow-purple" style={{ padding: '20px', borderRadius: '22px', display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
+          <div className="glass-panel glass-panel-glow-purple practice-stat-card practice-engagement-card" style={{ padding: '20px', borderRadius: '22px', display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>ENGAGEMENT GRAPH</div>
@@ -217,7 +217,7 @@ export default function PracticeStats({ token }) {
               <span style={{ padding: '6px 12px', borderRadius: '999px', color: '#00f2fe', border: '1px solid rgba(0,242,254,0.2)' }}>Live</span>
             </div>
 
-            <div style={{ position: 'relative', flex: 1, minHeight: '180px', display: 'flex', borderRadius: '16px', overflow: 'hidden' }}>
+            <div className="practice-chart-box" style={{ position: 'relative', flex: 1, minHeight: '180px', display: 'flex', borderRadius: '16px', overflow: 'hidden' }}>
               <svg viewBox="0 0 240 120" style={{ width: '100%', height: '100%', flex: 1 }} preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="sparkGradient" x1="0%" y1="0%" x2="100%" y2="0%">

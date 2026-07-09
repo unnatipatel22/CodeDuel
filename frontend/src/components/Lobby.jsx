@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { LogOut, Trophy, Swords, Zap, Loader2, ArrowRight, Bell, Crown, TrendingUp, Flame, User, Users, Briefcase } from 'lucide-react';
+import { LogOut, Trophy, Swords, Zap, Loader2, ArrowRight, Bell, Crown, TrendingUp, Flame, User, Users, Briefcase, ChevronDown, X } from 'lucide-react';
 import DarkVeil from './DarkVeil/DarkVeil';
 import MagicBento, { ParticleCard, GlobalSpotlight, BentoCardGrid } from './MagicBento';
 import PracticeStats from './PracticeStats';
@@ -26,6 +26,7 @@ export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, on
 
   const [activeView, setActiveView] = useState('dashboard');
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [newUsername, setNewUsername] = useState(user?.username || '');
 
   const [showConfig, setShowConfig] = useState(false);
@@ -40,13 +41,36 @@ export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, on
   const statsGridRef = useRef(null);
   const configGridRef = useRef(null);
   const leaderboardGridRef = useRef(null);
+  const profileMenuRef = useRef(null);
 
   useEffect(() => {
     fetchLeaderboard();
     fetchStats();
   }, []);
 
-  const fetchLeaderboard = async () => {
+  useEffect(() => {
+    if (!showProfileMenu) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setShowProfileMenu(false);
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showProfileMenu]);
+
+  async function fetchLeaderboard() {
     try {
       const res = await axios.get(`${API_BASE}/leaderboard`);
       if (res.data.success) setLeaderboard(res.data.leaderboard);
@@ -55,7 +79,7 @@ export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, on
     } finally {
       setLoadingLeaderboard(false);
     }
-  };
+  }
 
   const handleCompleteProfile = async (e) => {
     e.preventDefault();
@@ -79,7 +103,7 @@ export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, on
     }
   };
 
-  const fetchStats = async () => {
+  async function fetchStats() {
     try {
       const res = await axios.get(`${API_BASE}/users/me/stats`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -88,7 +112,7 @@ export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, on
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     }
-  };
+  }
 
   const handleCreate = async (nameToUse) => {
     setError('');
@@ -222,32 +246,84 @@ export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, on
         {/* GLOBAL NAVBAR */}
       <nav className="top-navbar">
         <div className="nav-links">
-          <div style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginRight: '32px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="nav-brand">
             <img 
               src="/logo.png" 
               alt="CodeDuel Logo" 
-              style={{ width: '32px', height: '32px', borderRadius: '4px' }} 
+              className="nav-brand-logo"
               onError={(e) => { 
                 e.target.style.display = 'none'; 
                 e.target.nextSibling.style.display = 'flex'; 
               }} 
             />
-            <div style={{ display: 'none', background: 'var(--color-cyan)', padding: '6px', borderRadius: '8px', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="nav-brand-fallback">
               <Swords size={20} color="#000" />
             </div>
-            CodeDuel
+            <span>CodeDuel</span>
           </div>
           <span className={`nav-link ${activeView === 'dashboard' ? 'active' : ''}`} onClick={() => { setActiveView('dashboard'); setShowConfig(false); }} style={activeView === 'dashboard' ? { background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '20px', cursor: 'pointer' } : { cursor: 'pointer' }}>Dashboard</span>
           <span className={`nav-link ${activeView === 'leaderboard' ? 'active' : ''}`} onClick={() => { setActiveView('leaderboard'); setShowConfig(false); }} style={activeView === 'leaderboard' ? { background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '20px', cursor: 'pointer' } : { cursor: 'pointer' }}>Leaderboard</span>
           <span className={`nav-link ${activeView === 'problems' ? 'active' : ''}`} onClick={() => { setActiveView('problems'); setShowConfig(false); }} style={activeView === 'problems' ? { background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '20px', cursor: 'pointer' } : { cursor: 'pointer' }}>Problems</span>
           <span className={`nav-link ${activeView === 'practiceHistory' ? 'active' : ''}`} onClick={() => { setActiveView('practiceHistory'); setShowConfig(false); }} style={activeView === 'practiceHistory' ? { background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '20px', cursor: 'pointer' } : { cursor: 'pointer' }}>Practice History</span>
         </div>
-        <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <Bell size={20} style={{ color: 'var(--text-secondary)', cursor: 'pointer' }} onClick={() => alert('No new notifications')} />
-          <div className="nav-user" onClick={onLogout} title="Logout" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-             <LogOut size={18} style={{ color: 'var(--text-secondary)' }} />
-          </div>
-          <img src={user.profilePic || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.username}`} alt="Profile" style={{ width: '38px', height: '38px', borderRadius: '50%', cursor: 'pointer', border: '2px solid var(--color-cyan)', objectFit: 'cover' }} onClick={() => setShowEditProfile(true)} title="Edit Profile" />
+
+        <div className="nav-actions" ref={profileMenuRef} style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <button className="nav-icon-button" type="button" onClick={() => alert('No new notifications')} title="Notifications">
+            <Bell size={18} />
+            <span className="nav-notification-dot" />
+          </button>
+
+          <button
+            className={`nav-profile-chip ${showProfileMenu ? 'is-open' : ''}`}
+            type="button"
+            onClick={() => setShowProfileMenu((open) => !open)}
+            aria-haspopup="menu"
+            aria-expanded={showProfileMenu}
+            title="User menu"
+          >
+            <img src={user.profilePic || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.username}`} alt="Profile" />
+            <span className="nav-profile-copy">
+              <span className="nav-profile-name">{user.username}</span>
+              <span className="nav-profile-meta">{user.profession || 'Coder'}</span>
+            </span>
+            <ChevronDown className="nav-profile-chevron" size={16} />
+          </button>
+
+          {showProfileMenu && (
+            <div className="profile-dropdown" role="menu">
+              <div className="profile-dropdown-header">
+                <img src={user.profilePic || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.username}`} alt="" />
+                <div>
+                  <div className="profile-dropdown-name">{user.username}</div>
+                  <div className="profile-dropdown-meta">{user.email || 'CodeDuel player'}</div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="profile-dropdown-item"
+                role="menuitem"
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  setNewUsername(user?.username || '');
+                  setShowEditProfile(true);
+                }}
+              >
+                <User size={16} />
+                <span>Edit Profile</span>
+              </button>
+
+              <button
+                type="button"
+                className="profile-dropdown-item profile-dropdown-danger"
+                role="menuitem"
+                onClick={onLogout}
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -258,7 +334,7 @@ export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, on
               <>
                 <div className="dash-header">
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <h1 className="dash-title">Ready to duel, <span style={{ color: 'var(--color-cyan)' }}>{user.username}</span> <button onClick={() => setShowEditProfile(true)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem', marginLeft: '8px' }}>✏️ Edit</button></h1>
+                      <h1 className="dash-title">Ready to duel, <span style={{ color: 'var(--color-cyan)' }}>{user.username}</span> <button onClick={() => { setNewUsername(user?.username || ''); setShowEditProfile(true); }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem', marginLeft: '8px' }}>✏️ Edit</button></h1>
                       <p className="dash-subtitle">Your win rate this week is {stats.winRate}% — stay sharp!</p>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end' }}>
@@ -435,21 +511,21 @@ export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, on
             <div style={{ position: 'relative' }}>
               <GlobalSpotlight gridRef={configGridRef} spotlightRadius={400} glowColor="0, 242, 254" />
               <BentoCardGrid gridRef={configGridRef}>
-                <ParticleCard className="magic-bento-card magic-bento-card--border-glow" style={{ backgroundColor: '#05070a', '--glow-color': '0, 242, 254', gridColumn: 'span 2', minHeight: 'auto', padding: '24px', justifyContent: 'flex-start', aspectRatio: 'auto' }} glowColor="0, 242, 254" particleCount={10} enableTilt={false} clickEffect={false} enableMagnetism={false}>
+                <ParticleCard className="magic-bento-card magic-bento-card--border-glow config-mode-card" style={{ backgroundColor: '#05070a', '--glow-color': '0, 242, 254', gridColumn: 'span 2', minHeight: 'auto', padding: '24px', justifyContent: 'flex-start', aspectRatio: 'auto' }} glowColor="0, 242, 254" particleCount={10} enableTilt={false} clickEffect={false} enableMagnetism={false}>
                   <div style={{ position: 'relative', zIndex: 10 }}>
                     <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', letterSpacing: '1px', marginBottom: '16px', fontWeight: 600 }}>BATTLE MODE</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                      <div onClick={() => setMode('practice')} style={{ padding: '16px', border: mode === 'practice' ? '1px solid var(--color-cyan)' : '1px solid var(--border-color)', background: mode === 'practice' ? 'rgba(56, 189, 248, 0.05)' : 'var(--bg-primary)', borderRadius: '10px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
+                    <div className="battle-mode-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                      <div className="battle-mode-option" onClick={() => setMode('practice')} style={{ padding: '16px', border: mode === 'practice' ? '1px solid var(--color-cyan)' : '1px solid var(--border-color)', background: mode === 'practice' ? 'rgba(56, 189, 248, 0.05)' : 'var(--bg-primary)', borderRadius: '10px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
                          <User size={24} style={{ color: mode === 'practice' ? 'var(--color-cyan)' : 'var(--text-secondary)', marginBottom: '8px', margin: '0 auto' }} />
                          <h3 style={{ fontSize: '1rem', marginBottom: '2px', color: mode === 'practice' ? 'var(--color-cyan)' : '#fff' }}>SOLO</h3>
                          <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>Race clock</p>
                       </div>
-                      <div onClick={() => setMode('1v1')} style={{ padding: '16px', border: mode === '1v1' ? '1px solid #3b82f6' : '1px solid var(--border-color)', background: mode === '1v1' ? 'rgba(59, 130, 246, 0.05)' : 'var(--bg-primary)', borderRadius: '10px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
+                      <div className="battle-mode-option" onClick={() => setMode('1v1')} style={{ padding: '16px', border: mode === '1v1' ? '1px solid #3b82f6' : '1px solid var(--border-color)', background: mode === '1v1' ? 'rgba(59, 130, 246, 0.05)' : 'var(--bg-primary)', borderRadius: '10px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
                          <Swords size={24} style={{ color: mode === '1v1' ? '#3b82f6' : 'var(--text-secondary)', marginBottom: '8px', margin: '0 auto' }} />
                          <h3 style={{ fontSize: '1rem', marginBottom: '2px', color: mode === '1v1' ? '#3b82f6' : '#fff' }}>DUEL</h3>
                          <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>1v1 ranked</p>
                       </div>
-                      <div onClick={() => setMode('squad')} style={{ padding: '16px', border: mode === 'squad' ? '1px solid var(--color-purple)' : '1px solid var(--border-color)', background: mode === 'squad' ? 'rgba(168, 85, 247, 0.05)' : 'var(--bg-primary)', borderRadius: '10px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
+                      <div className="battle-mode-option" onClick={() => setMode('squad')} style={{ padding: '16px', border: mode === 'squad' ? '1px solid var(--color-purple)' : '1px solid var(--border-color)', background: mode === 'squad' ? 'rgba(168, 85, 247, 0.05)' : 'var(--bg-primary)', borderRadius: '10px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
                          <Users size={24} style={{ color: mode === 'squad' ? 'var(--color-purple)' : 'var(--text-secondary)', marginBottom: '8px', margin: '0 auto' }} />
                          <h3 style={{ fontSize: '1rem', marginBottom: '2px', color: mode === 'squad' ? 'var(--color-purple)' : '#fff' }}>SQUAD</h3>
                          <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>Team vs team</p>
@@ -530,29 +606,35 @@ export default function Lobby({ user, setUser, token, onLogout, onCreateRoom, on
 
       {/* Edit Profile Modal */}
       {showEditProfile && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '40px', borderRadius: '24px', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '8px', fontWeight: 700 }}>Edit Profile</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>Choose a new username</p>
+        <div className="profile-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title">
+          <div className="profile-modal-card">
+            <button type="button" className="profile-modal-close" onClick={() => setShowEditProfile(false)} aria-label="Close edit profile">
+              <X size={18} />
+            </button>
+            <div className="profile-modal-avatar">
+              <img src={user.profilePic || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.username}`} alt="" />
+            </div>
+            <h3 id="edit-profile-title">Edit Profile</h3>
+            <p>Choose a new username for your arena identity.</p>
             <form onSubmit={(e) => {
               e.preventDefault();
               if(!newUsername.trim()) return;
-              const updatedUser = { ...user, username: newUsername };
+              const updatedUser = { ...user, username: newUsername.trim() };
               localStorage.setItem('user', JSON.stringify(updatedUser));
-              // Force reload to apply username change globally since backend route may not exist
-              window.location.reload();
-            }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              if (setUser) setUser(updatedUser);
+              setShowEditProfile(false);
+            }} className="profile-modal-form">
               <input
                 type="text"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
                 placeholder="New Username"
                 required
-                style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: '#fff', padding: '16px', borderRadius: '12px', textAlign: 'center', fontSize: '1.2rem', fontWeight: 600 }}
+                autoFocus
               />
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button type="button" onClick={() => setShowEditProfile(false)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
-                <button type="submit" className="btn btn-cyan" style={{ flex: 1 }}>Save Changes</button>
+              <div className="profile-modal-actions">
+                <button type="button" onClick={() => setShowEditProfile(false)} className="btn btn-outline">Cancel</button>
+                <button type="submit" className="btn btn-cyan">Save Changes</button>
               </div>
             </form>
           </div>
