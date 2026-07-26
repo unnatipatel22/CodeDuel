@@ -149,23 +149,6 @@ JUDGE0_API_KEY=
 FRONTEND_URL=
 ```
 
----
-
-## Screenshots
-
-Add screenshots of the following pages:
-
-- Login
-- Dashboard
-- Create Room
-- Join Room
-- Coding Workspace
-- Live Leaderboard
-- Profile
-- Admin Dashboard
-
----
-
 ## Future Roadmap
 
 - Team coding contests
@@ -179,11 +162,6 @@ Add screenshots of the following pages:
 
 ---
 
-## Contributing
-
-Contributions are welcome. If you would like to improve the project, feel free to fork the repository, create a new branch, and submit a pull request.
-
----
 
 ## License
 
