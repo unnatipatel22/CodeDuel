@@ -1,17 +1,19 @@
 # Dependencies
 node_modules/
 frontend/node_modules/
+admin-panel/node_modules/
 
 # Environment Variables
 .env
 frontend/.env
+admin-panel/.env
 
 # Uploaded Files
 uploads/
 
 # Build Files
 dist/
-frontend/dist/
+admin-panel/dist/
 
 # Logs
 *.log

@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// In production the panel normally sits behind the same domain as the API.
+// For a separately deployed panel, set VITE_API_BASE to the public backend URL
+// (for example: https://codeduel-backend.onrender.com/api).
+const apiBaseUrl = import.meta.env.VITE_API_BASE || '/api';
+
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE || 'http://localhost:5000/api',
+  baseURL: apiBaseUrl,
   timeout: 15000,
 });
 

@@ -1,16 +1,19 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import Sidebar from './Sidebar';
 
 export default function Layout() {
-  const { admin } = useAuth();
-
   return (
     <div className="admin-layout">
+      {/* Ambient glow orbs — matches CodeDuel frontend */}
+      <div className="admin-orb admin-orb-1" />
+      <div className="admin-orb admin-orb-2" />
+      <div className="admin-orb admin-orb-3" />
+
       <Sidebar currentPage="dashboard" onNavigate={() => {}} />
+
       <div className="admin-main-area">
-        <main className="admin-content">
+        <main className="admin-content fade-in">
           <Outlet />
         </main>
       </div>
