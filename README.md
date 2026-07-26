@@ -1,43 +1,155 @@
 # CodeDuel
 
-CodeDuel is a real-time competitive programming platform that enables developers to compete in live coding contests. Users can create or join coding rooms, solve algorithmic challenges, and receive instant code evaluation with live leaderboard updates. The platform is designed to provide an engaging environment for practicing data structures and algorithms through multiplayer coding competitions.
+CodeDuel is a real-time competitive programming platform that enables developers to participate in live coding contests, solve algorithmic challenges, and compete against other programmers in multiplayer coding rooms. The platform provides instant code evaluation, live rankings, and a seamless coding experience to make technical interview preparation more engaging and interactive.
 
+---
+
+## Table of Contents
+
+- Overview
+- Features
+- Tech Stack
+- System Architecture
+- Project Structure
+- Getting Started
+- Environment Variables
+- Screenshots
+- Roadmap
+- Contributing
+- License
+
+---
+
+## Overview
+
+CodeDuel is designed to simulate real-time coding competitions by allowing users to create or join coding rooms, solve programming challenges within a time limit, and compete on a live leaderboard. The platform supports multiple programming languages and provides instant feedback through an online code execution engine.
+
+---
 
 ## Features
 
-- Secure user authentication
-- Create and join coding rooms
+- User authentication and authorization
+- Create and join private coding rooms
 - Solo, 1v1, and multiplayer coding contests
-- Topic and difficulty based challenges
-- Real-time code execution and evaluation
-- Live leaderboard and rankings
-- Built-in code editor
-- Contest timer
+- Topic-based coding challenges
+- Difficulty-based problem selection
+- Real-time contest timer
+- Live leaderboard updates
+- Online code compilation and execution
+- Multiple programming language support
 - Submission history
 - User profile and performance tracking
-- Admin panel for problem management
+- Admin dashboard for managing coding problems
 
+---
 
 ## Tech Stack
 
+### Frontend
+
 - React
+- Vite
+
+### Backend
+
 - Node.js
 - Express.js
+
+### Database
+
 - MongoDB
+
+### Additional Technologies
+
 - Socket.IO
 - Judge0 API
 - JWT Authentication
 
+---
 
-## Project Workflow
+## System Architecture
 
-1. Sign in to the platform.
-2. Create a new coding room or join an existing one.
-3. Select the contest settings and coding challenge.
-4. Write and submit your solution.
-5. Receive instant evaluation results.
-6. Compete on the live leaderboard until the contest ends.
+```
+                    +-------------------+
+                    |      Client       |
+                    |    React + Vite   |
+                    +---------+---------+
+                              |
+                         HTTP / WebSocket
+                              |
+                    +---------v---------+
+                    |   Express Server  |
+                    +---------+---------+
+                              |
+             +----------------+----------------+
+             |                                 |
+     MongoDB Database                  Judge0 API
+     User & Contest Data             Code Execution
+```
 
+---
+
+## Project Structure
+
+```text
+CodeDuel/
+│
+├── frontend/
+│
+├── backend/
+│
+├── admin-panel/
+│
+├── DEPLOYMENT.md
+│
+├── package.json
+│
+└── README.md
+```
+
+---
+
+## Getting Started
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/unnatipatel22/CodeDuel.git
+```
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Run the Application
+
+```bash
+npm start
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file and configure the required environment variables before running the project.
+
+Example:
+
+```env
+PORT=
+
+MONGODB_URI=
+
+JWT_SECRET=
+
+JUDGE0_API_KEY=
+
+FRONTEND_URL=
+```
+
+---
 
 ## Screenshots
 
@@ -48,34 +160,39 @@ Add screenshots of the following pages:
 - Create Room
 - Join Room
 - Coding Workspace
-- Leaderboard
+- Live Leaderboard
 - Profile
 - Admin Dashboard
 
+---
 
-## Future Improvements
+## Future Roadmap
 
-- AI-powered coding assistance
 - Team coding contests
-- Daily coding challenges
+- AI-powered coding assistance
 - Contest analytics
-- Global rankings
-- Achievement system
+- Daily coding challenges
+- Global ranking system
+- Achievement badges
 - Code plagiarism detection
+- Contest replay and discussion
 
+---
 
 ## Contributing
 
-Contributions are welcome. Feel free to fork the repository, make improvements, and submit a pull request.
+Contributions are welcome. If you would like to improve the project, feel free to fork the repository, create a new branch, and submit a pull request.
 
+---
 
 ## License
 
 This project is licensed under the MIT License.
 
+---
 
 ## Author
 
 **Unnati Patel**
 
-If you found this project useful, consider giving it a star.
+GitHub: https://github.com/unnatipatel22
