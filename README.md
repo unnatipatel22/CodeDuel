@@ -1,32 +1,89 @@
-# CodeDuel — Backend + Frontend
+# CodeDuel
 
-CodeDuel is a full-stack competitive coding app (Express + Socket.io backend, React + Vite frontend).
+CodeDuel is a real-time competitive programming platform that enables developers to compete in live coding contests. Users can create or join coding rooms, solve algorithmic challenges, and receive instant code evaluation with live leaderboard updates. The platform is designed to provide an engaging environment for practicing data structures and algorithms through multiplayer coding competitions.
 
-Quick links
+---
 
-- Deployment instructions: see [DEPLOYMENT.md](DEPLOYMENT.md)
-- Frontend: `frontend/` (Vite + React)
-- Admin panel: `admin-panel/` (optional)
+## Features
 
-Deployment (short)
+- Secure user authentication
+- Create and join coding rooms
+- Solo, 1v1, and multiplayer coding contests
+- Topic and difficulty based challenges
+- Real-time code execution and evaluation
+- Live leaderboard and rankings
+- Built-in code editor
+- Contest timer
+- Submission history
+- User profile and performance tracking
+- Admin panel for problem management
 
-1. Set production environment variables (see `.env.example`).
-2. Build the frontend:
+---
 
-```bash
-cd frontend
-npm ci
-npm run build
-```
+## Tech Stack
 
-3a. Serve frontend separately (Vercel/Netlify): deploy `frontend/dist`. Set `VITE_API_BASE` and `VITE_SOCKET_URL` to your backend URL.
+- React
+- Node.js
+- Express.js
+- MongoDB
+- Socket.IO
+- Judge0 API
+- JWT Authentication
 
-3b. Or serve frontend from backend: from repo root run:
+---
 
-```bash
-npm ci
-npm run build   # builds frontend
-NODE_ENV=production PORT=5000 node index.js
-```
+## Project Workflow
 
-See `DEPLOYMENT.md` for the full step-by-step guide and provider-specific recommendations.
+1. Sign in to the platform.
+2. Create a new coding room or join an existing one.
+3. Select the contest settings and coding challenge.
+4. Write and submit your solution.
+5. Receive instant evaluation results.
+6. Compete on the live leaderboard until the contest ends.
+
+---
+
+## Screenshots
+
+Add screenshots of the following pages:
+
+- Login
+- Dashboard
+- Create Room
+- Join Room
+- Coding Workspace
+- Leaderboard
+- Profile
+- Admin Dashboard
+
+---
+
+## Future Improvements
+
+- AI-powered coding assistance
+- Team coding contests
+- Daily coding challenges
+- Contest analytics
+- Global rankings
+- Achievement system
+- Code plagiarism detection
+
+---
+
+## Contributing
+
+Contributions are welcome. Feel free to fork the repository, make improvements, and submit a pull request.
+
+---
+
+## License
+
+This project is licensed under the MIT License.
+
+---
+
+## Author
+
+**Unnati Patel**
+
+If you found this project useful, consider giving it a star.
