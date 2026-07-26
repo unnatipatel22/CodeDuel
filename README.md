@@ -2,7 +2,6 @@
 
 CodeDuel is a real-time competitive programming platform that enables developers to compete in live coding contests. Users can create or join coding rooms, solve algorithmic challenges, and receive instant code evaluation with live leaderboard updates. The platform is designed to provide an engaging environment for practicing data structures and algorithms through multiplayer coding competitions.
 
----
 
 ## Features
 
@@ -18,7 +17,6 @@ CodeDuel is a real-time competitive programming platform that enables developers
 - User profile and performance tracking
 - Admin panel for problem management
 
----
 
 ## Tech Stack
 
@@ -30,7 +28,6 @@ CodeDuel is a real-time competitive programming platform that enables developers
 - Judge0 API
 - JWT Authentication
 
----
 
 ## Project Workflow
 
@@ -41,7 +38,6 @@ CodeDuel is a real-time competitive programming platform that enables developers
 5. Receive instant evaluation results.
 6. Compete on the live leaderboard until the contest ends.
 
----
 
 ## Screenshots
 
@@ -56,7 +52,6 @@ Add screenshots of the following pages:
 - Profile
 - Admin Dashboard
 
----
 
 ## Future Improvements
 
@@ -68,19 +63,16 @@ Add screenshots of the following pages:
 - Achievement system
 - Code plagiarism detection
 
----
 
 ## Contributing
 
 Contributions are welcome. Feel free to fork the repository, make improvements, and submit a pull request.
 
----
 
 ## License
 
 This project is licensed under the MIT License.
 
----
 
 ## Author
 
