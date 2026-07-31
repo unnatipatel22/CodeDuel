@@ -163,12 +163,6 @@ FRONTEND_URL=
 ---
 
 
-## License
-
-This project is licensed under the MIT License.
-
----
-
 ## Author
 
 **Unnati Patel**
